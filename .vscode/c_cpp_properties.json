@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Watcom",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_cdecl="
+            ],
+            "compilerPath": "/usr/bin/watcom/binl/wcc",
+            "cStandard": "c99",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "clang-x64",
+            "compilerArgs": [
+                "-4 -d3 -s -wx -ms -zl -zq"
+            ]
+        }
+    ],
+    "version": 4
+}
