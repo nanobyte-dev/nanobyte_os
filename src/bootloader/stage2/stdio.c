@@ -15,6 +15,15 @@ void puts(const char* str)
     }
 }
 
+void puts_f(const char far* str)
+{
+    while(*str)
+    {
+        putc(*str);
+        str++;
+    }
+}
+
 #define PRINTF_STATE_NORMAL         0
 #define PRINTF_STATE_LENGTH         1
 #define PRINTF_STATE_LENGTH_SHORT   2
@@ -25,6 +34,7 @@ void puts(const char* str)
 #define PRINTF_LENGTH_SHORT_SHORT   1
 #define PRINTF_LENGTH_SHORT         2
 #define PRINTF_LENGTH_LONG          3
+#define PRINTF_LENGTH_LONG_LONG     4
 
 int* printf_number(int* argp, int length, bool sign, int radix);
 
@@ -59,7 +69,7 @@ void _cdecl printf(const char* fmt, ...)
                                 state = PRINTF_STATE_LENGTH_SHORT;
                                 break;
                     case 'l':   length = PRINTF_LENGTH_LONG;
-                                state = PRINTF_STATE_SPEC;
+                                state = PRINTF_STATE_LENGTH_LONG;
                                 break;
                     default:    goto PRINTF_STATE_SPEC_;
                 }
@@ -74,6 +84,15 @@ void _cdecl printf(const char* fmt, ...)
                 else goto PRINTF_STATE_SPEC_;
                 break;
 
+            case PRINTF_STATE_LENGTH_LONG:
+                if (*fmt == 'l')
+                {
+                    length = PRINTF_LENGTH_LONG_LONG;
+                    state = PRINTF_STATE_SPEC;
+                }
+                else goto PRINTF_STATE_SPEC_;
+                break;
+
             case PRINTF_STATE_SPEC:
             PRINTF_STATE_SPEC_:
                 switch (*fmt)
@@ -82,7 +101,9 @@ void _cdecl printf(const char* fmt, ...)
                                 argp++;
                                 break;
 
-                    case 's':   puts(*(char**)argp);
+                    case 's':   if (length == PRINTF_LENGTH_LONG || length == PRINTF_LENGTH_LONG_LONG)
+                                    puts_f(*(const char far**)argp);
+                                else puts(*(const char**)argp);
                                 argp++;
                                 break;
 
@@ -129,7 +150,7 @@ const char g_HexChars[] = "0123456789abcdef";
 int* printf_number(int* argp, int length, bool sign, int radix)
 {
     char buffer[32];
-    unsigned long number;
+    unsigned long long number;
     int number_sign = 1;
     int pos = 0;
 
@@ -147,7 +168,7 @@ int* printf_number(int* argp, int length, bool sign, int radix)
                     n = -n;
                     number_sign = -1;
                 }
-                number = (unsigned long)n;
+                number = (unsigned long long)n;
             }
             else
             {
@@ -165,7 +186,7 @@ int* printf_number(int* argp, int length, bool sign, int radix)
                     n = -n;
                     number_sign = -1;
                 }
-                number = (unsigned long)n;
+                number = (unsigned long long)n;
             }
             else
             {
@@ -173,13 +194,31 @@ int* printf_number(int* argp, int length, bool sign, int radix)
             }
             argp += 2;
             break;
+
+        case PRINTF_LENGTH_LONG_LONG:
+            if (sign)
+            {
+                long long int n = *(long long int*)argp;
+                if (n < 0)
+                {
+                    n = -n;
+                    number_sign = -1;
+                }
+                number = (unsigned long long)n;
+            }
+            else
+            {
+                number = *(unsigned long long int*)argp;
+            }
+            argp += 4;
+            break;
     }
 
     // convert number to ASCII
     do 
     {
-        uint32_t rem = number % radix;
-        number = number / radix;
+        uint32_t rem;
+        x86_div64_32(number, radix, &number, &rem);
         buffer[pos++] = g_HexChars[rem];
     } while (number > 0);
 
