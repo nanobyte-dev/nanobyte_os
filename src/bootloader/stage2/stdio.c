@@ -101,10 +101,16 @@ void _cdecl printf(const char* fmt, ...)
                                 argp++;
                                 break;
 
-                    case 's':   if (length == PRINTF_LENGTH_LONG || length == PRINTF_LENGTH_LONG_LONG)
+                    case 's':   if (length == PRINTF_LENGTH_LONG || length == PRINTF_LENGTH_LONG_LONG) 
+                                {
                                     puts_f(*(const char far**)argp);
-                                else puts(*(const char**)argp);
-                                argp++;
+                                    argp += 2;
+                                }
+                                else 
+                                {
+                                    puts(*(const char**)argp);
+                                    argp++;
+                                }
                                 break;
 
                     case '%':   putc('%');
