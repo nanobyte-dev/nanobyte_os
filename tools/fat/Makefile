@@ -12,14 +12,14 @@ all: fat
 fat: $(BUILD_DIR)/tools/fat.out
 
 $(BUILD_DIR)/tools/fat.out: $(OBJECTS_ASM) $(OBJECTS_C)
-	$(CC) $(CFLAGS) -o $(BUILD_DIR)/tools/fat.out $(OBJECTS_C)
+	@$(CC) $(CFLAGS) -o $@ $(OBJECTS_C)
 
 $(BUILD_DIR)/tools/fat/%.o: %.c always
-	$(CC) $(CFLAGS) -c -o $@ $<
+	@$(CC) $(CFLAGS) -c -o $@ $<
 
 always:
-	mkdir -p $(BUILD_DIR)/tools/fat
+	@mkdir -p $(BUILD_DIR)/tools/fat
 
 clean:
-	rm -f $(BUILD_DIR)/tools/fat.out
-	rm -rf $(BUILD_DIR)/tools/fat
+	@rm -f $(BUILD_DIR)/tools/fat.out
+	@rm -rf $(BUILD_DIR)/tools/fat
