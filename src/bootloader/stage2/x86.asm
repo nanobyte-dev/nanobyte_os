@@ -114,7 +114,7 @@ x86_Disk_GetDriveParams:
 
     ; drive type from bl
     LinearToSegOffset [bp + 12], es, esi, si
-    mov es:[si], bl
+    mov [es:si], bl
 
     ; cylinders
     mov bl, ch          ; cylinders - lower bits in ch
@@ -123,21 +123,21 @@ x86_Disk_GetDriveParams:
     inc bx
 
     LinearToSegOffset [bp + 16], es, esi, si
-    mov es:[si], bx
+    mov [es:si], bx
 
     ; sectors
     xor ch, ch          ; sectors - lower 5 bits in cl
     and cl, 3Fh
     
     LinearToSegOffset [bp + 20], es, esi, si
-    mov es:[si], cx
+    mov [es:si], cx
 
     ; heads
     mov cl, dh          ; heads - dh
     inc cx
 
     LinearToSegOffset [bp + 24], es, esi, si
-    mov es:[si], cx
+    mov [es:si], cx
 
     ; restore regs
     pop di
