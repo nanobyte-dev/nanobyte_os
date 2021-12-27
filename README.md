@@ -5,7 +5,12 @@ This repo contains the code from the ["Building an OS"](https://www.youtube.com/
 First, install the following dependencies:
 
 ```
+# Ubuntu, Debian:
 $ sudo apt install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo \
+                   nasm mtools qemu-system-x86
+           
+# Fedora:
+$ sudo dnf install gcc gcc-c++ make bison flex gmp-devel libmpc-devel mpfr-devel texinfo \
                    nasm mtools qemu-system-x86
 ```
 
