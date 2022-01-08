@@ -3,7 +3,8 @@
         {
             "name": "GCC",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/toolchain/i686-elf/lib/gcc/i686-elf/11.2.0/include"
             ],
             "defines": [
             ],
@@ -12,7 +13,7 @@
             "cppStandard": "c++14",
             "intelliSenseMode": "gcc-x86",
             "compilerArgs": [
-                "-std=c99 -ffreestanding -nostdlib"
+                "-std=c99", "-ffreestanding", "-nostdlib"
             ]
         }
     ],
