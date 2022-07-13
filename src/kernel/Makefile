@@ -11,14 +11,16 @@ HEADERS_C = $(wildcard *.h) \
 SOURCES_C = $(wildcard *.c) \
 			$(wildcard */*.c) \
 			$(wildcard */*/*.c) \
-			$(wildcard */*/*/*.c)
+			$(wildcard */*/*/*.c) \
+			arch/i686/isrs_gen.c
 
 OBJECTS_C = $(patsubst %.c, $(BUILD_DIR)/kernel/c/%.obj, $(SOURCES_C))
 
 HEADERS_ASM = $(wildcard *.inc) \
 			  $(wildcard */*.inc) \
 			  $(wildcard */*/*.inc) \
-			  $(wildcard */*/*/*.inc)
+			  $(wildcard */*/*/*.inc) \
+			  arch/i686/isrs_gen.inc
 
 SOURCES_ASM = $(wildcard *.asm) \
 			  $(wildcard */*.asm) \
@@ -47,6 +49,9 @@ $(BUILD_DIR)/kernel/asm/%.obj: %.asm $(HEADERS_ASM)
 	@mkdir -p $(@D)
 	@$(TARGET_ASM) $(TARGET_ASMFLAGS) -o $@ $<
 	@echo "--> Compiled: " $<
+
+arch/i686/isrs_gen.c arch/i686/isrs_gen.inc:
+	@$(SOURCE_DIR)/build_tools/generate_isrs.sh $@
 
 clean:
 	rm -f $(BUILD_DIR)/kernel.bin

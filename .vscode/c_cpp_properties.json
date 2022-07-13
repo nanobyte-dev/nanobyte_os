@@ -7,15 +7,17 @@
                 "${workspaceFolder}/src/kernel",
                 "${workspaceFolder}/toolchain/i686-elf/lib/gcc/i686-elf/11.2.0/include"
             ],
-            "defines": [
-            ],
+            "defines": [],
             "compilerPath": "${workspaceFolder}/toolchain/i686-elf/bin/i686-elf-gcc",
             "cStandard": "c99",
             "cppStandard": "c++14",
             "intelliSenseMode": "gcc-x86",
             "compilerArgs": [
-                "-std=c99", "-ffreestanding", "-nostdlib"
-            ]
+                "-std=c99",
+                "-ffreestanding",
+                "-nostdlib"
+            ],
+            "configurationProvider": "ms-vscode.makefile-tools"
         }
     ],
     "version": 4
