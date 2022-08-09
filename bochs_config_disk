@@ -1,8 +1,0 @@
-megs: 128
-romimage: file=/home/tibi/Downloads/bochs-2.7.pre1/bios/BIOS-bochs-latest
-vgaromimage: file=/home/tibi/Downloads/bochs-2.7.pre1/bios/VGABIOS-elpin-2.40
-mouse: enabled=0
-display_library: x, options="gui_debug"
-ata0-master: type=disk, path="build/main_disk.raw", heads=32, spt=63
-
-boot: disk

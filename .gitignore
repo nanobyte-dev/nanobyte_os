@@ -3,3 +3,5 @@ toolchain/
 *.err
 bx_enh_dbg.ini
 .vscode/*.log
+.sconsign.dblite
+__pycache__/

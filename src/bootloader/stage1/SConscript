@@ -1,0 +1,25 @@
+from SCons.Environment import Environment
+
+from build_scripts.utility import GlobRecursive
+
+Import('TARGET_ENVIRONMENT')
+TARGET_ENVIRONMENT: Environment
+
+env = TARGET_ENVIRONMENT.Clone()
+env.Append(
+    ASFLAGS = [
+        f'-DFILESYSTEM={TARGET_ENVIRONMENT["imageFS"]}',
+    ],
+    LINKFLAGS = [
+        '-Wl,-T', env.File('linker.ld').srcnode().path,
+        '-Wl,-Map=' + env.File('stage1.map').path
+    ],
+)
+
+inputs = GlobRecursive(env, "*.asm")
+
+objects = env.Object(inputs)
+
+stage1 = env.Program('stage1.bin', objects)
+
+Export('stage1')
