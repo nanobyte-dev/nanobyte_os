@@ -14,6 +14,8 @@ entry:
 
     ; save boot drive
     mov [g_BootDrive], dl
+    mov [g_BootPartitionOff], si
+    mov [g_BootPartitionSeg], di
 
     ; setup stack
     mov ax, ds
@@ -54,6 +56,11 @@ entry:
     call _init
 
     ; expect boot drive in dl, send it as argument to cstart function
+    mov dx, [g_BootPartitionSeg]
+    shl edx, 16
+    mov dx, [g_BootPartitionOff]
+    push edx
+
     xor edx, edx
     mov dl, [g_BootDrive]
     push edx
@@ -171,3 +178,5 @@ g_GDTDesc:  dw g_GDTDesc - g_GDT - 1    ; limit = size of GDT
             dd g_GDT                    ; address of GDT
 
 g_BootDrive: db 0
+g_BootPartitionSeg: dw 0
+g_BootPartitionOff: dw 0
