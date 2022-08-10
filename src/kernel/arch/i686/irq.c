@@ -5,8 +5,10 @@
 #include <stddef.h>
 #include <util/arrays.h>
 #include "stdio.h"
+#include <debug.h>
 
 #define PIC_REMAP_OFFSET        0x20
+#define MODULE                  "PIC"
 
 IRQHandler g_IRQHandlers[16];
 static const PICDriver* g_Driver = NULL;
@@ -22,7 +24,7 @@ void i686_IRQ_Handler(Registers* regs)
     }
     else
     {
-        printf("Unhandled IRQ %d...\n", irq);
+        log_warn(MODULE, "Unhandled IRQ %d...", irq);
     }
 
     // send EOI
@@ -42,11 +44,11 @@ void i686_IRQ_Initialize()
     }
 
     if (g_Driver == NULL) {
-        printf("Warning: No PIC found!\n");
+        log_warn(MODULE, "No PIC found!");
         return;
     }
 
-    printf("Found %s PIC.\n", g_Driver->Name);
+    log_info(MODULE, "Found %s PIC.", g_Driver->Name);
     g_Driver->Initialize(PIC_REMAP_OFFSET, PIC_REMAP_OFFSET + 8, false);
 
     // register ISR handlers for each of the 16 irq lines
