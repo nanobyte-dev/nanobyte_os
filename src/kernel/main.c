@@ -20,9 +20,9 @@ void __attribute__((section(".entry"))) start(uint16_t bootDrive)
 
     HAL_Initialize();
 
-    clrscr();
-
     printf("Hello from kernel!\n");
+    debugf("Hello using port E5!\n");
+    debugf("\033[34mHello using colors and port E5!\033[0m\n");
 
     //i686_IRQ_RegisterHandler(0, timer);
 
