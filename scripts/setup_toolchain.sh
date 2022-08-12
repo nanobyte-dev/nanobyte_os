@@ -1,10 +1,12 @@
 #!/bin/bash
 
-BINUTILS_VERSION=2.37
-GCC_VERSION=11.2.0
+BINUTILS_VERSION="${BINUTILS_VERSION:-2.37}"
+GCC_VERSION="${GCC_VERSION:-11.2.0}"
 
 BINUTILS_URL="https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz"
 GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz"
+
+TARGET=i686-elf
 
 # ---------------------------
 
@@ -30,8 +32,9 @@ if [ -z "$TOOLCHAINS_DIR" ]; then
 fi
 
 pushd "$TOOLCHAINS_DIR"
+TOOLCHAIN_PREFIX="$TOOLCHAINS_DIR/$TARGET"
 
-if [ "$OPERATION" = "build"]; then
+if [ "$OPERATION" = "build" ]; then
 
     # Download and build binutils
     BINUTILS_SRC="binutils-${BINUTILS_VERSION}"
@@ -41,14 +44,16 @@ if [ "$OPERATION" = "build"]; then
     tar -xf binutils-${BINUTILS_VERSION}.tar.xz
 
     mkdir -p ${BINUTILS_BUILD}
-    cd ${BINUTILS_BUILD} && CFLAGS= ASMFLAGS= CC= CXX= LD= ASM= LINKFLAGS= LIBS= ../binutils-${BINUTILS_VERSION}/configure \
+    pushd ${BINUTILS_BUILD}
+    ../binutils-${BINUTILS_VERSION}/configure \
         --prefix="${TOOLCHAIN_PREFIX}"	\
         --target=${TARGET}				\
         --with-sysroot					\
         --disable-nls					\
         --disable-werror
-    make -j8 -C ${BINUTILS_BUILD}
-    make -C ${BINUTILS_BUILD} install
+    make -j8 
+    make install
+    popd
 
     # Download and build GCC
     GCC_SRC="gcc-${GCC_VERSION}"
@@ -57,14 +62,16 @@ if [ "$OPERATION" = "build"]; then
     wget ${GCC_URL}
     tar -xf gcc-${GCC_VERSION}.tar.xz
     mkdir -p ${GCC_BUILD}
-    cd ${GCC_BUILD} && CFLAGS= ASMFLAGS= CC= CXX= LD= ASM= LINKFLAGS= LIBS= ../gcc-${GCC_VERSION}/configure \
+    pushd ${GCC_BUILD}
+    ../gcc-${GCC_VERSION}/configure     \
         --prefix="${TOOLCHAIN_PREFIX}" 	\
         --target=${TARGET}				\
         --disable-nls					\
         --enable-languages=c,c++		\
         --without-headers
-    make -j8 -C ${GCC_BUILD} all-gcc all-target-libgcc
-    make -C ${GCC_BUILD} install-gcc install-target-libgcc
+    make -j8 all-gcc all-target-libgcc
+    make install-gcc install-target-libgcc
+    popd
 
 elif [ "$OPERATION" = "clean" ]; then
 	rm -rf *
