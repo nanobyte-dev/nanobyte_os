@@ -26,6 +26,7 @@ typedef struct {
 
 void MBR_DetectPartition(Partition* part, DISK* disk, void* partition)
 {
+    part->disk = disk;
     if (disk->id < 0x80) {
         part->partitionOffset = 0;
         part->partitionSize = (uint32_t)(disk->cylinders)

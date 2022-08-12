@@ -3,6 +3,11 @@ bits 16
 
 %define ENDL 0x0D, 0x0A
 
+%define fat12 1
+%define fat16 2
+%define fat32 3
+%define ext2  4
+
 
 ;
 ; FAT12 header
@@ -14,6 +19,8 @@ section .fsjump
     nop
 
 section .fsheaders
+
+%if (FILESYSTEM == fat12) || (FILESYSTEM == fat16) || (FILESYSTEM == fat32)
 
     bdb_oem:                    db "abcdefgh"           ; 8 bytes
     bdb_bytes_per_sector:       dw 512
@@ -29,6 +36,16 @@ section .fsheaders
     bdb_hidden_sectors:         dd 0
     bdb_large_sector_count:     dd 0
 
+    %if (FILESYSTEM == fat32)
+        fat32_sectors_per_fat:      dd 0
+        fat32_flags:                dw 0
+        fat32_fat_version_number:   dw 0
+        fat32_rootdir_cluster:      dd 0
+        fat32_fsinfo_sector:        dw 0
+        fat32_backup_boot_sector:   dw 0
+        fat32_reserved:             times 12 db 0
+    %endif
+
     ; extended boot record
     ebr_drive_number:           db 0                    ; 0x00 floppy, 0x80 hdd, useless
                                 db 0                    ; reserved
@@ -36,6 +53,8 @@ section .fsheaders
     ebr_volume_id:              db 12h, 34h, 56h, 78h   ; serial number, value doesn't matter
     ebr_volume_label:           db 'NANOBYTE OS'        ; 11 bytes, padded with spaces
     ebr_system_id:              db 'FAT12   '           ; 8 bytes
+
+%endif
 
 ;
 ; Code goes here
@@ -72,10 +91,6 @@ section .entry
         ; read something from floppy disk
         ; BIOS should set DL to drive number
         mov [ebr_drive_number], dl
-
-        ; show loading message
-        mov si, msg_loading
-        call puts
 
         ; check extensions present
         mov ah, 0x41
@@ -320,9 +335,8 @@ section .text
 
 section .rodata
 
-    msg_loading:            db 'Loading...', ENDL, 0
-    msg_read_failed:        db 'Read from disk failed!', ENDL, 0
-    msg_stage2_not_found:   db 'STAGE2.BIN file not found!', ENDL, 0
+    msg_read_failed:        db 'Read failed!', ENDL, 0
+    msg_stage2_not_found:   db 'STAGE2.BIN not found!', ENDL, 0
     file_stage2_bin:        db 'STAGE2  BIN'
 
 section .data
