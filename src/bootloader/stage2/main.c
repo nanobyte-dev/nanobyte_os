@@ -6,6 +6,8 @@
 #include "memdefs.h"
 #include "memory.h"
 #include "mbr.h"
+#include "stdlib.h"
+#include "string.h"
 
 uint8_t* KernelLoadBuffer = (uint8_t*)MEMORY_LOAD_KERNEL;
 uint8_t* Kernel = (uint8_t*)MEMORY_KERNEL_ADDR;
