@@ -1,3 +1,21 @@
+DEPS_ALPINE=(
+    build-base
+    gmp-dev
+    mpc
+    mpfr-dev
+    bison
+    flex
+    texinfo
+    nasm
+    mtools
+    qemu-system-x86_64
+    python3
+    py3-pip
+    scons
+    py3-parted
+    py3-sh
+)
+
 DEPS_DEBIAN=(
     build-essential
     bison 
@@ -78,7 +96,7 @@ elif [ -x "$(command -v zypper)" ]; then
     PACKAGE_INSTALL='zypper install'
     DEPS="$DEPS_SUSE"
 elif [ -x "$(command -v pacman)" ]; then
-    OS='suse'
+    OS='arch'
     PACKAGE_UPDATE='pacman -Syy'
     PACKAGE_INSTALL='pacman -S'
     DEPS="${DEPS_ARCH[@]}"
