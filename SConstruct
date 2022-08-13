@@ -3,7 +3,7 @@ from SCons.Variables import *
 from SCons.Environment import *
 from SCons.Node import *
 from build_scripts.phony_targets import PhonyTargets
-from build_scripts.utility import ParseSize
+from build_scripts.utility import ParseSize, RemoveSuffix
 
 VARS = Variables('build_scripts/config.py', ARGUMENTS)
 VARS.AddVariables(
@@ -86,9 +86,9 @@ platform_prefix = ''
 if HOST_ENVIRONMENT['arch'] == 'i686':
     platform_prefix = 'i686-elf-'
 
-toolchainDir = Path(HOST_ENVIRONMENT['toolchain'], platform_prefix.removesuffix('-')).resolve()
+toolchainDir = Path(HOST_ENVIRONMENT['toolchain'], RemoveSuffix(platform_prefix, '-')).resolve()
 toolchainBin = Path(toolchainDir, 'bin')
-toolchainGccLibs = Path(toolchainDir, 'lib', 'gcc', platform_prefix.removesuffix('-'), DEPS['gcc'])
+toolchainGccLibs = Path(toolchainDir, 'lib', 'gcc', RemoveSuffix(platform_prefix, '-'), DEPS['gcc'])
 
 TARGET_ENVIRONMENT = HOST_ENVIRONMENT.Clone(
     AR = f'{platform_prefix}ar',

@@ -54,3 +54,9 @@ def IsFileName(obj, name):
     elif isinstance(obj, File) or isinstance(obj, Dir) or isinstance(obj, Entry):
         return obj.name == name
     return False
+
+
+def RemoveSuffix(str, suffix):
+    if str.endswith(suffix):
+        return str[:-len(suffix)]
+    return str
