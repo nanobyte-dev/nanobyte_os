@@ -36,4 +36,8 @@ objects = [
 
 kernel = env.Program('kernel.elf', objects)
 
+kernel_stripped = env.Command('kernel-stripped.elf', kernel, '$STRIP -o $TARGET $SOURCE')
+env.Default(kernel_stripped)
+
 Export('kernel')
+Export('kernel_stripped')
