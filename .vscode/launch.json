@@ -5,6 +5,32 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "OS Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/i686_debug/kernel/kernel.elf",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "logging": {
+                "engineLogging": true
+            },
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description":  "Run script",
+                    "text": "source ${workspaceFolder}/.vscode/.gdb_script.gdb",
+                    "ignoreFailures": false
+                }
+            ],
+            // "customLaunchSetupCommands": [
+            //     { "text": "", "description": "", "ignoreFailures": false }
+            // ],
+            "launchCompleteCommand": "None",
+        },
+        {
             "name": "(gdb) tools/fat",
             "type": "cppdbg",
             "request": "launch",

@@ -8,21 +8,20 @@ if [ "$#" -le 1 ]; then
 fi
 
 case "$1" in
-    "floppy")   QEMU_ARGS="${QEMU_ARGS} -fda $2"
+    "floppy")   QEMU_ARGS="${QEMU_ARGS} -fda $PWD/$2"
     ;;
-    "disk")     QEMU_ARGS="${QEMU_ARGS} -hda $2"
+    "disk")     QEMU_ARGS="${QEMU_ARGS} -hda $PWD/$2"
     ;;
     *)          echo "Unknown image type $1."
                 exit 2
 esac
 
-
-cat > .gdb_script.gdb << EOF
-    b *0x7c00
+# b *0x7c00
+# layout asm
+cat > .vscode/.gdb_script.gdb << EOF
+    symbol-file $PWD/build/i686_debug/kernel/kernel.elf
     set disassembly-flavor intel
-    layout asm
     target remote | qemu-system-i386 $QEMU_ARGS
 EOF
 
-gdb -x .gdb_script.gdb
-rm -f .gdb_script.gdb
+gdb -x .vscode/.gdb_script.gdb

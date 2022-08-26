@@ -34,6 +34,6 @@ objects = [
     obj_crtn
 ]
 
-kernel = env.Program('kernel.bin', objects)
+kernel = env.Program('kernel.elf', objects)
 
 Export('kernel')
