@@ -1,0 +1,24 @@
+import os
+
+from SCons.Environment import Environment
+from build_scripts.utility import GlobRecursive, FindIndex, IsFileName
+
+
+Import('TARGET_ENVIRONMENT')
+TARGET_ENVIRONMENT: Environment
+
+env = TARGET_ENVIRONMENT.Clone()
+env.Append(
+    CPPPATH = [ env.Dir('.').srcnode() ],
+    ASFLAGS = [ '-I', env.Dir('.').srcnode(), '-f', 'elf' ]
+)
+
+sources = GlobRecursive(env, '*.c') + \
+          GlobRecursive(env, '*.cpp') + \
+          GlobRecursive(env, '*.asm')
+
+objects = env.Object(sources)
+
+libcore = env.StaticLibrary('libcore.o', objects)
+
+Export('libcore')

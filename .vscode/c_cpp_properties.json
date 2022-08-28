@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src/kernel",
-                "${workspaceFolder}/toolchain/i686-elf/lib/gcc/i686-elf/11.2.0/include"
+                "${workspaceFolder}/../.toolchains/i686-elf/lib/gcc/i686-elf/11.2.0/include"
             ],
             "defines": [],
             "compilerPath": "${workspaceFolder}/../.toolchains/i686-elf/bin/i686-elf-gcc",

@@ -251,5 +251,6 @@ output = f'image.{output_fmt}'
 image = env.Command(output, inputs,
                     action=Action(build_image, 'Creating disk image...'), 
                     BASEDIR=root.srcnode().path)
+env.Depends(image, inputs)
 
 Export('image')
