@@ -61,7 +61,7 @@ DEPS_ARCH=(
     mtools
     qemu-system-x86
     python3-pip
-    python3-scons
+    scons
 )
 
 DEPS_SUSE=()
