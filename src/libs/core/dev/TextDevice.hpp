@@ -1,7 +1,7 @@
 #pragma once
 #include <stdarg.h>
 #include "CharacterDevice.hpp"
-#include <cpp/TypeTraits.hpp>
+#include <core/cpp/TypeTraits.hpp>
 
 class TextDevice 
 {
