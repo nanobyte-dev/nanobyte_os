@@ -34,7 +34,7 @@ size_t RangeBlockDevice::Write(const uint8_t* data, size_t size)
     return m_Device->Write(data, size);
 }
 
-void RangeBlockDevice::Seek(SeekPos pos, int rel)
+bool RangeBlockDevice::Seek(SeekPos pos, int rel)
 {
     if (m_Device == nullptr)
         return;
@@ -42,16 +42,13 @@ void RangeBlockDevice::Seek(SeekPos pos, int rel)
     switch (pos)
     {
     case SeekPos::Set:
-        m_Device->Seek(SeekPos::Set, m_RangeBegin + rel);
-        break;
+        return m_Device->Seek(SeekPos::Set, m_RangeBegin + rel);
     
     case SeekPos::Current:
-        m_Device->Seek(SeekPos::Current, rel);
-        break;
+        return m_Device->Seek(SeekPos::Current, rel);
 
     case SeekPos::End:
-        m_Device->Seek(SeekPos::Set, m_RangeBegin + m_RangeSize);
-        break;
+        return m_Device->Seek(SeekPos::Set, m_RangeBegin + m_RangeSize);
     }
 }
 
