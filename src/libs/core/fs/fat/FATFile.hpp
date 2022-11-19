@@ -1,8 +1,8 @@
 #pragma once
-#include <fs/File.hpp>
-#include <fs/FileEntry.hpp>
-#include <fs/fat/FATHeaders.hpp>
-#include <fs/fat/FATFileEntry.hpp>
+#include "../File.hpp"
+#include "../FileEntry.hpp"
+#include "../fat/FATHeaders.hpp"
+#include "../fat/FATFileEntry.hpp"
 
 class FATFileSystem;
 
@@ -10,8 +10,10 @@ class FATFile : public File
 {
 public:
     FATFile();
-    bool Open(FATFileSystem* fs, uint32_t firstCluster, uint32_t size, bool isDirectory);
+    bool Open(FATFileSystem* fs, uint32_t firstCluster, const char* name, uint32_t size, bool isDirectory);
     bool OpenRootDirectory1216(FATFileSystem* fs, uint32_t rootDirLba, uint32_t rootDirSize);
+
+    virtual void Release() override;
 
     bool IsOpened() const { return m_Opened; }
     bool ReadFileEntry(FATDirectoryEntry* dirEntry);
@@ -22,7 +24,8 @@ public:
     virtual size_t Size() override { return m_Size; }
     virtual size_t Position() override { return m_Position; }
     
-    virtual bool ReadFileEntry(FileEntry& entryOut) override;
+    virtual FileEntry* ReadFileEntry() override;
+    
 
 private:
     bool UpdateCurrentCluster();

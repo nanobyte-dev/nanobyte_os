@@ -19,26 +19,25 @@ FATFile::FATFile()
 {
 }
 
-bool FATFile::Open(FATFileSystem* fs, uint32_t firstCluster, uint32_t size, bool isDirectory)
+bool FATFile::Open(FATFileSystem* fs, uint32_t firstCluster, const char* name, uint32_t size, bool isDirectory)
 {
-    const FATDirectoryEntry* dirEntry = reinterpret_cast<const FATDirectoryEntry*>(fileEntry.FSData);
-
     m_IsRootDirectory = false;
     m_Position = 0;
-    m_Size = dirEntry->Size;
+    m_Size = size;
     m_IsDirectory = isDirectory;
-    m_FirstCluster = dirEntry->FirstClusterLow + ((uint32_t)dirEntry->FirstClusterHigh << 16);
+    m_FirstCluster = firstCluster;
     m_CurrentCluster = m_FirstCluster;
     m_CurrentClusterIndex = 0;
     m_CurrentSectorInCluster = 0;
 
     if (!m_FS->ReadSectorFromCluster(m_CurrentCluster, m_CurrentSectorInCluster, m_Buffer))
     {
-        Debug::Error(LOG_MODULE, "FAT: open file %s failed - read error cluster=%u\n", fileEntry.Name, m_CurrentCluster);
+        Debug::Error(LOG_MODULE, "FAT: open file %s failed - read error cluster=%u\n", name, m_CurrentCluster);
         return false;
     }
 
     m_Opened = true;
+    return true;
 }
 
 bool FATFile::OpenRootDirectory1216(FATFileSystem* fs, uint32_t rootDirLba, uint32_t rootDirSize)
@@ -56,6 +55,13 @@ bool FATFile::OpenRootDirectory1216(FATFileSystem* fs, uint32_t rootDirLba, uint
         Debug::Error(LOG_MODULE, "FAT: read root directory failed\r\n");
         return false;
     }
+
+    return true;
+}
+
+void FATFile::Release()
+{
+    m_FS->ReleaseFile(this);
 }
 
 bool FATFile::ReadFileEntry(FATDirectoryEntry* dirEntry)
@@ -156,6 +162,7 @@ bool FATFile::Seek(SeekPos pos, int rel)
     }
 
     UpdateCurrentCluster();
+    return true;
 }
 
 bool FATFile::UpdateCurrentCluster()
@@ -183,7 +190,15 @@ bool FATFile::UpdateCurrentCluster()
     return m_FS->ReadSectorFromCluster(m_CurrentCluster, m_CurrentSectorInCluster, m_Buffer);
 }
 
-bool FATFile::ReadFileEntry(FileEntry& entryOut)
+FileEntry* FATFile::ReadFileEntry()
 {
-    
+    FATDirectoryEntry entry;
+    if (ReadFileEntry(&entry))
+    {
+        FATFileEntry* fileEntry = m_FS->AllocateFileEntry();
+        fileEntry->Initialize(m_FS, entry);
+        return fileEntry;
+    }
+
+    return nullptr;
 }

@@ -1,14 +1,27 @@
 #pragma once
 
+#include "File.hpp"
+
 enum class FileType
 {
     File,
     Directory
 };
 
-struct FileEntry
+enum FileOpenMode
 {
-    char Name[256];
-    uint8_t FSData[256];
-    FileType Type;
+    Read,
+    Write,
+    Append
+};
+
+class FileEntry
+{
+public:
+    virtual void Release() = 0;
+
+    virtual const char* Name() = 0;
+    virtual const FileType Type() = 0;
+
+    virtual File* Open(FileOpenMode mode) = 0;
 };

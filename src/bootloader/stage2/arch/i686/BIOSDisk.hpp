@@ -1,6 +1,5 @@
 #include <core/dev/BlockDevice.hpp>
 
-static inline const constexpr int SectorSize = 512;
 
 class BIOSDisk : public BlockDevice
 {
@@ -9,13 +8,15 @@ public:
     bool Initialize();
     virtual size_t Read(uint8_t* data, size_t size) override;
     virtual size_t Write(const uint8_t* data, size_t size) override;
-    virtual void Seek(SeekPos pos, int rel) override;
+    virtual bool Seek(SeekPos pos, int rel) override;
     virtual size_t Size() override;
     virtual size_t Position() override;
 
 private:
     bool ReadNextSector();
     void LBA2CHS(uint32_t lba, uint16_t* cylinderOut, uint16_t* sectorOut, uint16_t* headOut);
+
+    static inline const constexpr int SectorSize = 512;
 
     uint8_t m_Id;
     bool m_HaveExtensions;

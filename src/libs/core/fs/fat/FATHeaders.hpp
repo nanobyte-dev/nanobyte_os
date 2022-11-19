@@ -94,18 +94,6 @@ struct FATBootSector
 
 } __attribute__((packed));
 
-
-typedef struct
-{
-    uint8_t Buffer[SectorSize];
-    FATFile Public;
-    bool Opened;
-    uint32_t FirstCluster;
-    uint32_t CurrentCluster;
-    uint32_t CurrentSectorInCluster;
-
-} FAT_FileData;
-
 typedef struct {
     uint8_t Order;
     int16_t Chars[13];

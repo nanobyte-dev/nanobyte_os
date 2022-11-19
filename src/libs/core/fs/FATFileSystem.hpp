@@ -1,7 +1,7 @@
 #pragma once
 
 #include "FileSystem.hpp"
-#include <fs/fat/FATData.hpp>
+#include "fat/FATData.hpp"
 
 constexpr int FATRequiredMemory = 0x10000;
 
@@ -10,7 +10,6 @@ class FATFileSystem : public FileSystem
 public:
     FATFileSystem();
     virtual bool Initialize(BlockDevice* device) override;
-    virtual File* Open(FileEntry* parent, FileOpenMode mode) override;
     virtual File* RootDirectory() override;
     bool ReadSector(uint32_t lba, uint8_t* buffer, size_t count = 1);
     bool ReadSectorFromCluster(uint32_t cluster, uint32_t sectorOffset, uint8_t* buffer);
@@ -19,6 +18,11 @@ public:
     uint8_t FatType() const { return m_FatType; }
     FATData& Data() { return *m_Data; }
 
+    FATFile* AllocateFile();
+    void ReleaseFile(FATFile*);
+
+    FATFileEntry* AllocateFileEntry();
+    void ReleaseFileEntry(FATFileEntry*);
 
 private:
     bool ReadBootSector();

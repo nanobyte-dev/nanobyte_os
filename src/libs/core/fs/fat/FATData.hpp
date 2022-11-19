@@ -1,6 +1,7 @@
 #pragma once
 #include "FATHeaders.hpp"
 #include "FATFile.hpp"
+#include "../../mem/StaticObjectPool.hpp"
 
 constexpr int MaxFileNameSize = 256;
 constexpr int MaxFileHandles = 10;
@@ -18,7 +19,8 @@ typedef struct
     } BS;
 
     FATFile RootDirectory;
-    FATFile OpenedFiles[MaxFileHandles];
+    StaticObjectPool<FATFile, MaxFileHandles> OpenedFilePool;
+    StaticObjectPool<FATFileEntry, MaxFileHandles> FileEntryPool;
 
     uint8_t FatCache[FatCacheSize * SectorSize];
     uint32_t FatCachePosition;

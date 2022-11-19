@@ -44,7 +44,7 @@ bool FATFileSystem::Initialize(BlockDevice* device)
     uint32_t rootDirSize;
     if (isFat32) {
         m_DataSectionLba = m_Data->BS.BootSector.ReservedSectors + m_SectorsPerFat * m_Data->BS.BootSector.FatCount;
-        if (!m_Data->RootDirectory.Open(this, m_Data->BS.BootSector.EBR32.RootDirectoryCluster, 0, true))
+        if (!m_Data->RootDirectory.Open(this, m_Data->BS.BootSector.EBR32.RootDirectoryCluster, "", 0, true))
             return false;
     }
     else {
@@ -59,43 +59,35 @@ bool FATFileSystem::Initialize(BlockDevice* device)
 
     DetectFatType();
 
-    // reset opened files
-    for (int i = 0; i < MaxFileHandles; i++)
-        m_Data->OpenedFiles[i] = FATFile();
     m_Data->LFNCount = 0;
 
     return true;
 }
 
-File* FATFileSystem::Open(FileEntry* file, FileOpenMode mode)
+FATFile* FATFileSystem::AllocateFile()
 {
-    // find empty handle
-    int handle = -1;
-    for (int i = 0; i < MaxFileHandles && handle < 0; i++)
-    {
-        if (!m_Data->OpenedFiles[i].IsOpened())
-            handle = i;
-    }
-
-    // out of handles
-    if (handle < 0)
-    {
-        Debug::Error(LOG_MODULE, "FAT: out of file handles\r\n");
-        return nullptr;
-    }
-
-    // setup vars
-    const FATDirectoryEntry* dirEntry = reinterpret_cast<const FATDirectoryEntry*>(file->FSData);
-    uint32_t size = dirEntry->Size;
-    uint32_t firstCluster = dirEntry->FirstClusterLow + ((uint32_t)dirEntry->FirstClusterHigh << 16);
-
-    m_Data->OpenedFiles[handle].Open(this, firstCluster, size, dirEntry->Attributes & FAT_ATTRIBUTE_DIRECTORY);
-    return &m_Data->OpenedFiles[handle];
+    return m_Data->OpenedFilePool.Allocate();
 }
+
+void FATFileSystem::ReleaseFile(FATFile* file)
+{
+    m_Data->OpenedFilePool.Free(file);
+}
+
+FATFileEntry* FATFileSystem::AllocateFileEntry()
+{
+    return m_Data->FileEntryPool.Allocate();
+}
+
+void FATFileSystem::ReleaseFileEntry(FATFileEntry* fileEntry)
+{
+    m_Data->FileEntryPool.Free(fileEntry);
+}
+
 
 File* FATFileSystem::RootDirectory()
 {
-    &m_Data->RootDirectory;
+    return &m_Data->RootDirectory;
 }
 
 bool FATFileSystem::ReadSector(uint32_t lba, uint8_t* buffer, size_t count)

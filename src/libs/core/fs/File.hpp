@@ -1,8 +1,11 @@
 #pragma once
-#include <dev/BlockDevice.hpp>
+#include "../dev/BlockDevice.hpp"
+
+class FileEntry;
 
 class File : public BlockDevice 
 {
 public:
-    virtual bool ReadFileEntry(FileEntry& entryOut) = 0;
+    virtual FileEntry* ReadFileEntry() = 0;
+    virtual void Release() = 0;
 };

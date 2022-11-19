@@ -166,23 +166,25 @@ void BIOSDisk::LBA2CHS(uint32_t lba, uint16_t* cylinderOut, uint16_t* sectorOut,
 
 }
 
-void BIOSDisk::Seek(SeekPos pos, int rel)
+bool BIOSDisk::Seek(SeekPos pos, int rel)
 {
     switch (pos)
     {
         case SeekPos::Set:
             m_Pos = -1;
-            break;
+            return true;
 
         case SeekPos::Current:
             m_Pos += rel;
             ReadNextSector();
-            break;
+            return true;
 
         case SeekPos::End:
             m_Pos = m_Size;
-            break;
+            return true;
     }
+
+    return false;
 }
 
 size_t BIOSDisk::Size()

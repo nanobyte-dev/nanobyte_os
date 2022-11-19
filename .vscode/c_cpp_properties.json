@@ -4,13 +4,12 @@
             "name": "GCC",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/src/kernel",
                 "${workspaceFolder}/../.toolchains/i686-elf/lib/gcc/i686-elf/11.2.0/include"
             ],
             "defines": [],
             "compilerPath": "${workspaceFolder}/../.toolchains/i686-elf/bin/i686-elf-gcc",
             "cStandard": "c99",
-            "cppStandard": "c++14",
+            "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x86",
             "compilerArgs": [
                 "-std=c99",

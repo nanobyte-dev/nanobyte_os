@@ -37,7 +37,7 @@ size_t RangeBlockDevice::Write(const uint8_t* data, size_t size)
 bool RangeBlockDevice::Seek(SeekPos pos, int rel)
 {
     if (m_Device == nullptr)
-        return;
+        return false;
         
     switch (pos)
     {
@@ -49,6 +49,9 @@ bool RangeBlockDevice::Seek(SeekPos pos, int rel)
 
     case SeekPos::End:
         return m_Device->Seek(SeekPos::Set, m_RangeBegin + m_RangeSize);
+
+    default:
+        return false;
     }
 }
 
