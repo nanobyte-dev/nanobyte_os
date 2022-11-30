@@ -1,6 +1,12 @@
 {
     "files.associations": {
         "x86.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "hal.h": "c",
+        "stdint.h": "c",
+        "stdint-gcc.h": "c",
+        "cstdint": "c",
+        "ctype.h": "c",
+        "stdbool.h": "c"
     }
 }
