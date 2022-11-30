@@ -19,6 +19,11 @@ paru -S gcc make bison flex libgmp-static libmpc mpfr texinfo nasm mtools qemu-s
 ```
 NOTE: to install all the required packages on Arch, you need an [AUR helper](https://wiki.archlinux.org/title/AUR_helpers).
 
+I had to run this to get guestmount to work without sudo:
+```bash
+sudo dpkg-statoverride --update --add root root 0644 /boot/vmlinuz-`uname -r`
+```
+
 Then you must run `python3 -m pip install -r requirements.txt`
 
 After that, run `scons toolchain`, this should download and build the required tools (binutils and GCC). If you encounter errors during this step, you might have to modify `build_scripts/config.mk` and try a different version of **binutils** and **gcc**. Using the same version as the one bundled with your distribution is your best bet.
@@ -29,3 +34,4 @@ Finally, you should be able to run `scons`. Use `scons run` to test your OS usin
 
 * [Discord channel](https://discord.gg/RgHc5XrCEw)
 * [Patreon](https://www.patreon.com/nanobyte)
+
