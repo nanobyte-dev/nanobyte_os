@@ -31,6 +31,10 @@
         "memory.h": "c",
         "irq.h": "c",
         "bootparams.h": "c",
-        "io.h": "c"
+        "io.h": "c",
+        "chrono": "c",
+        "i8042.h": "c",
+        "i8259.h": "c",
+        "keyboard.h": "c"
     }
 }
