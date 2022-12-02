@@ -32,6 +32,8 @@ void ReportPS2Ports() {
         printf("No keyboard detected.\r\n");
     } else {
         printf("Keyboard detected on PS/2 port %d.\r\n", driver->KeyboardPortNumber);
+
+        printf("Keyboard is using scancode set %d.\r\n", Keyboard_getScancodeSet());
     }
     if (driver->MousePortNumber == -1) {
         printf("No mouse detected.\r\n");
@@ -68,6 +70,7 @@ void start(BootParams* bootParams)
 
     const PS2Driver* driver = i8042_getDriver();
     Keyboard_initialize();
+    Keyboard_setScancodeSet(1);
     ReportPS2Ports();
 
     while (true) {

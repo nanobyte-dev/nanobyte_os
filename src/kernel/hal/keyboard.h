@@ -19,3 +19,5 @@ void Keyboard_setScancodeSet(uint8_t setNumber);
 bool Keyboard_isKeyPressed(uint8_t scancode);
 bool Keyboard_isShiftPressed();
 Keyboard_key Keyboard_processKey();
+bool Keyboard_hasKey();
+Keyboard_key* Keyboard_popKey();
