@@ -135,6 +135,8 @@ int Keyboard_getScancodeSet() {
  * setNumber: Scancode sets 1-3.
  */
 void Keyboard_setScancodeSet(uint8_t setNumber) {
+    i8042_disableScanning(g_PS2PortKeyboard);
+
     if (Keyboard_getScancodeSet() == setNumber) {
         return;
     }
@@ -143,6 +145,8 @@ void Keyboard_setScancodeSet(uint8_t setNumber) {
         i8042_sendCommand(PS2_COMMAND_SCANCODE_SET, g_PS2PortKeyboard); // Get/set current scancode set.
         i8042_sendCommand(setNumber, g_PS2PortKeyboard); // Set scancode set.
     } while (i686_inb(PS2_DATA_PORT) == PS2_RESPONSE_RESEND);
+
+    i8042_enableScanning(g_PS2PortKeyboard);
 }
 
 bool Keyboard_isKeyPressed(uint8_t scancode) {
@@ -198,11 +202,17 @@ Keyboard_key* Keyboard_popKey() {
 }
 
 bool Keyboard_hasKey() {
-    return g_KeyBufferIndex != SIZE_KEYBUFFER;
+    return g_KeyBufferIndex < SIZE_KEYBUFFER;
 }
 
 bool Keyboard_isBufferFull() {
     return g_KeyBufferIndex == 0;
+}
+
+void Keyboard_clearBuffer() {
+    while (Keyboard_hasKey()) {
+        Keyboard_popKey();
+    }
 }
 
 void Keyboard_irqHandler(Registers* regs) {
@@ -223,6 +233,7 @@ void Keyboard_initialize() {
     g_PS2PortKeyboard = i8042_getDriver()->KeyboardPortNumber;
     //Keyboard_etLEDs(true, true, true); // Doesn't work in QEMU?
     //Keyboard_setTypematicRateAndDelay(0x1F, 0);
-    Keyboard_setScancodeSet(2); // Just to be sure.
+    Keyboard_setScancodeSet(1); // Just to be sure.
     i686_IRQ_RegisterHandler(1, Keyboard_irqHandler);
+    Keyboard_clearBuffer();
 }

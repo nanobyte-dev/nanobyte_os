@@ -21,3 +21,4 @@ bool Keyboard_isShiftPressed();
 Keyboard_key Keyboard_processKey();
 bool Keyboard_hasKey();
 Keyboard_key* Keyboard_popKey();
+void Keyboard_clearBuffer();
