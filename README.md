@@ -21,6 +21,8 @@ NOTE: to install all the required packages on Arch, you need an [AUR helper](htt
 
 Then you must run `python3 -m pip install -r requirements.txt`
 
+Next, modify the configuration in `build_scripts/config.py`. The most important is the `toolchain='../.toolchains'` option which sets where the toolchain will be downloaded and built. The default option is in the directory above where the repo is cloned, in a .toolchains directory, but you will get an error if this directory doesn't exist.
+
 After that, run `scons toolchain`, this should download and build the required tools (binutils and GCC). If you encounter errors during this step, you might have to modify `scripts/setup_toolchain.sh` and try a different version of **binutils** and **gcc**. Using the same version as the one bundled with your distribution is your best bet.
 
 Finally, you should be able to run `scons`. Use `scons run` to test your OS using qemu.
