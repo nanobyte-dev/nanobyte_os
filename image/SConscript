@@ -5,6 +5,7 @@ from decimal import Decimal
 from io import SEEK_CUR, SEEK_SET
 from pathlib import Path
 from shutil import copy2
+from getpass import getpass
 import parted
 import sh
 
@@ -23,6 +24,19 @@ TARGET_ENVIRONMENT: Environment
 env:Environment = TARGET_ENVIRONMENT
 
 SECTOR_SIZE = 512
+
+CACHED_SUDO_PASSWORD = None
+
+def get_sudo_password(prompt: str):
+    """
+    Uses `getpass` to read a password from the user. Caches password so
+    we only need to request it once.
+    """
+    global CACHED_SUDO_PASSWORD
+    if CACHED_SUDO_PASSWORD is None:
+        CACHED_SUDO_PASSWORD = getpass(prompt)
+    return CACHED_SUDO_PASSWORD
+
 
 def generate_image_file(target: str, size_sectors: int):
     with open(target, 'wb') as fout:
@@ -148,17 +162,40 @@ def create_partition_table(target: str, align_start: int):
     disk.commit()
 
 
-def mount_fs(image: str, mount_dir: str):
-    sh.guestmount(mount_dir, add=image, mount='/dev/sda1')
+def mount_fs(image: str, mount_dir: str, mount_method: str):
+    if mount_method == 'guestfs':
+        sh.guestmount(mount_dir, add=image, mount='/dev/sda1')
+        return None
+    elif mount_method == 'mount':
+        pwd = get_sudo_password('Please type your username password for running mount: ')
+        uid = os.getuid()
+        with sh.contrib.sudo(password=pwd, k=True, _with=True):
+            out = sh.losetup(image, partscan=True, find=True, show=True, _tty_in=True, _unify_ttys=True)
+            for line in out.split('\n'):
+                if '/dev/' in line:
+                    loop_device = line.strip()
+            sh.mount(loop_device + "p1", mount_dir, o=f'uid={uid},sync')
+        return loop_device
+    else:
+        raise ValueError("Unknown mount method - " + mount_method)
 
-def unmount_fs(mount_dir: str):
+
+def unmount_fs(mount_dir: str, mount_method, mount_token):
     time.sleep(3)
-    sh.fusermount(u=mount_dir)
+    if mount_method == 'guestfs':
+        sh.fusermount(u=mount_dir)
+    else:
+        pwd = get_sudo_password('Please type your username password for running mount: ')
+        with sh.contrib.sudo(password=pwd, k=True, _with=True):
+            sh.umount(mount_dir)
+            sh.losetup(d=mount_token)
+        time.sleep(3)
 
 
 def build_disk(image, stage1, stage2, kernel, files, env):
     size_sectors = (env['imageSize'] + SECTOR_SIZE - 1) // SECTOR_SIZE
     file_system = env['imageFS']
+    mount_method = env['mountMethod']
     partition_offset = 2048
 
     stage1_size = os.stat(stage1).st_size
@@ -190,7 +227,7 @@ def build_disk(image, stage1, stage2, kernel, files, env):
         os.mkdir(tempdir)
 
         print(f"> mounting image to {tempdir}...")
-        mount_fs(image, tempdir)
+        mount_token = mount_fs(image, tempdir, mount_method)
 
         # copy kernel
         print(f"> copying kernel...")
@@ -216,7 +253,7 @@ def build_disk(image, stage1, stage2, kernel, files, env):
     finally:
         print("> cleaning up...")
         try:
-            unmount_fs(tempdir)
+            unmount_fs(tempdir, mount_token)
         except:
             pass
         os.rmdir(tempdir)

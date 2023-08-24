@@ -31,6 +31,7 @@ if [ -z "$TOOLCHAINS_DIR" ]; then
     exit 1
 fi
 
+mkdir -p "$TOOLCHAINS_DIR"
 pushd "$TOOLCHAINS_DIR"
 TOOLCHAIN_PREFIX="$TOOLCHAINS_DIR/$TARGET"
 
