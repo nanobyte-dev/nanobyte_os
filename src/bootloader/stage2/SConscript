@@ -23,6 +23,10 @@ sources = GlobRecursive(env, '*.c') + \
           GlobRecursive(env, '*.cpp') + \
           GlobRecursive(env, '*.asm')
 
+headers = GlobRecursive(env, '*.h') + \
+          GlobRecursive(env, '*.hpp') + \
+          GlobRecursive(env, '*.inc')
+
 objects = env.Object(sources)
 
 obj_crti = objects.pop(FindIndex(objects, lambda item: IsFileName(item, 'crti.o')))
@@ -43,6 +47,7 @@ objects = [
     obj_crtn
 ]
 
-stage2 = env.Program('stage2.bin', objects)
+stage2 = env.Program('stage2.elf', objects)
+env.Depends(stage2, headers)
 
 Export('stage2')

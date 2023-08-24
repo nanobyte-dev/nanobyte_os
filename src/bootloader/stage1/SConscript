@@ -9,6 +9,7 @@ env = TARGET_ENVIRONMENT.Clone()
 env.Append(
     ASFLAGS = [
         f'-DFILESYSTEM={TARGET_ENVIRONMENT["imageFS"]}',
+        f'-I', env.Dir('.').srcnode(),
     ],
     LINKFLAGS = [
         '-Wl,-T', env.File('linker.ld').srcnode().path,
@@ -17,9 +18,11 @@ env.Append(
 )
 
 inputs = GlobRecursive(env, "*.asm")
+headers = GlobRecursive(env, "*.inc")
 
 objects = env.Object(inputs)
 
 stage1 = env.Program('stage1.bin', objects)
+env.Depends(stage1, headers)
 
 Export('stage1')

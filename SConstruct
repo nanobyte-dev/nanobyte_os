@@ -151,16 +151,19 @@ SConscript('src/bootloader/stage2/SConscript', variant_dir=variantDir + '/stage2
 SConscript('src/kernel/SConscript', variant_dir=variantDir + '/kernel', duplicate=0)
 SConscript('image/SConscript', variant_dir=variantDir, duplicate=0)
 
-Import('image')
-Default(image)
+Import('stage1', 'stage2', 'kernel', 'image')
+Default(stage1, stage2, kernel)
+HOST_ENVIRONMENT.Alias('image', image)
 
 # Phony targets
 PhonyTargets(HOST_ENVIRONMENT, 
              run=['./scripts/run.sh', HOST_ENVIRONMENT['imageType'], image[0].path],
              debug=['./scripts/debug.sh', HOST_ENVIRONMENT['imageType'], image[0].path],
+             debug_stage2=['./scripts/debug_stage2.sh', HOST_ENVIRONMENT['imageType'], image[0].path],
              bochs=['./scripts/bochs.sh', HOST_ENVIRONMENT['imageType'], image[0].path],
              toolchain=['./scripts/setup_toolchain.sh', HOST_ENVIRONMENT['toolchain']])
 
 Depends('run', image)
 Depends('debug', image)
+Depends('debug_stage2', image)
 Depends('bochs', image)

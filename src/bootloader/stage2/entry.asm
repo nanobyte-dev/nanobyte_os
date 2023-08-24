@@ -14,8 +14,8 @@ entry:
 
     ; save boot drive
     mov [g_BootDrive], dl
-    mov [g_BootPartitionOff], si
-    mov [g_BootPartitionSeg], di
+    mov [g_BootPartitionOff], di
+    mov [g_BootPartitionSeg], es
 
     ; setup stack
     mov ax, ds

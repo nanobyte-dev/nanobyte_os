@@ -21,7 +21,8 @@ esac
 cat > .vscode/.gdb_script.gdb << EOF
     set disassembly-flavor intel
     target remote | qemu-system-i386 $QEMU_ARGS
-    symbol-file $PWD/build/i686_debug/kernel/kernel.elf
+    set tdesc filename $PWD/scripts/target.xml
+    symbol-file $PWD/build/i686_debug/stage2/stage2.elf
 EOF
 
 gdb -x .vscode/.gdb_script.gdb
