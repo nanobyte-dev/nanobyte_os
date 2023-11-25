@@ -20,7 +20,7 @@ do
     case "$1" in
         -c) OPERATION='clean'
             ;;
-        *)  TOOLCHAINS_DIR="$1"
+        *)  TOOLCHAINS_DIR=$(realpath "$1")
             ;;
     esac
     shift
