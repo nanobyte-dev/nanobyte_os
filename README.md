@@ -4,6 +4,7 @@ This repo contains the code from the ["Building an OS"](https://www.youtube.com/
 This branch contains the code as written in [Part 7 - Finishing the bootloader, migrating to C](https://youtu.be/qr8d7bZLPHg), with some minor bug fixes:
 
 * fixed bochs configuration
+* fixed toolchain building script
 
 ## Prerequisites
 
