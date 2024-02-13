@@ -34,6 +34,7 @@ For Part 2, you need the following tools:
 * press *Continue*
 * if everything goes right, you will end up at address 0x7C00. If the code looks different than `boot.asm`, run the *Disassemble* command again.
 * run step by step to see your code in action. If the code looks like garbage, you probably need to *Disassemble* again.
+* to avoid debugging through BIOS code (you see addresses starting with many FFFFs), set a breakpoint after the `int` call, and then press *Continue*.
 * when reaching the `hlt` instruction, look at the memory range `0x7E00-0x8000` (*View* - *Physical/Linear Mem Dump*). Open `main_floppy.img` in a hex editor of your choice, navigate to the second sector (offset `0x200` or `512`). The data should be the same.
 
 **Troubleshooting**: Bochs has proven to be pretty unreliable. Check [this article](https://github.com/nanobyte-dev/nanobyte_os/wiki/Frequent-issues#bochs-doesnt-work) for some troubleshooting tips.
