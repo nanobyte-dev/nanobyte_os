@@ -25,3 +25,9 @@ For Part 1, you need the following tools:
 ## Running with qemu
 
 * run `qemu-system-i386 -fda build/main_floppy.img`
+
+## Links
+
+* [YouTube](https://www.youtube.com/channel/UCSPIuWADJIMIf9Erf--XAsA)
+* [Discord channel](https://discord.gg/RgHc5XrCEw)
+* [Patreon](https://www.patreon.com/nanobyte)
