@@ -54,7 +54,7 @@ main:
 
     hlt
 
-.halt
+.halt:
     jmp .halt
 
 
