@@ -4,6 +4,7 @@ This repo contains the code from the ["Building an OS"](https://www.youtube.com/
 This branch contains the code as written in [Part 2](https://youtu.be/srbnMNk7K7k), with some minor bug fixes:
 
 * src/kernel/main.asm: added missing colon on line 57
+* fixed bochs configuration
 
 ## Prerequisites
 
