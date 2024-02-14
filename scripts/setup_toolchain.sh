@@ -20,7 +20,7 @@ do
     case "$1" in
         -c) OPERATION='clean'
             ;;
-        *)  TOOLCHAINS_DIR="$1"
+        *)  TOOLCHAINS_DIR=$(realpath "$1")
             ;;
     esac
     shift
@@ -31,6 +31,7 @@ if [ -z "$TOOLCHAINS_DIR" ]; then
     exit 1
 fi
 
+mkdir -p "$TOOLCHAINS_DIR"
 pushd "$TOOLCHAINS_DIR"
 TOOLCHAIN_PREFIX="$TOOLCHAINS_DIR/$TARGET"
 
