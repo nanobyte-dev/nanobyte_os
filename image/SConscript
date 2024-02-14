@@ -181,7 +181,7 @@ def mount_fs(image: str, mount_dir: str, mount_method: str):
 
 
 def unmount_fs(mount_dir: str, mount_method, mount_token):
-    time.sleep(3)
+    time.sleep(2)
     if mount_method == 'guestfs':
         sh.fusermount(u=mount_dir)
     else:
@@ -189,7 +189,7 @@ def unmount_fs(mount_dir: str, mount_method, mount_token):
         with sh.contrib.sudo(password=pwd, k=True, _with=True):
             sh.umount(mount_dir)
             sh.losetup(d=mount_token)
-        time.sleep(3)
+        time.sleep(1)
 
 
 def build_disk(image, stage1, stage2, kernel, files, env):
@@ -221,7 +221,7 @@ def build_disk(image, stage1, stage2, kernel, files, env):
     install_stage2(image, stage2, offset=1, limit=partition_offset)
 
     tempdir_name = 'tmp_mount_{0}'.format(int(time.time()))
-    tempdir = os.path.join(os.path.dirname(image), tempdir_name)
+    tempdir = os.path.join('/tmp', tempdir_name)
     try:
         # mount
         os.mkdir(tempdir)
@@ -252,10 +252,13 @@ def build_disk(image, stage1, stage2, kernel, files, env):
 
     finally:
         print("> cleaning up...")
-        try:
-            unmount_fs(tempdir, mount_token)
-        except:
-            pass
+        for tries in range(5):
+            try:
+                unmount_fs(tempdir, mount_method, mount_token)
+                break
+            except BaseException as ex:
+                print('    ... attempt', tries, 'to unmount failed:', ex)
+                time.sleep(5)
         os.rmdir(tempdir)
 
 
