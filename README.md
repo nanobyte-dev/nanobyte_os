@@ -65,7 +65,7 @@ There are 2 supported mount methods that can be configured in `build_scripts/con
 
 ### Warning
 
-** DO NOT use `sudo` to run the build. This will mess up file permissions for all the files in the `build` directory, and has the potential of damaging your system. The build script will request elevated privileges only when performing the mount operations.
+** DO NOT use `sudo` to run the build**. This will mess up file permissions for all the files in the `build` directory, and has the potential of damaging your system. The build script will request elevated privileges only when performing the mount operations.
 
 ## Running
 
