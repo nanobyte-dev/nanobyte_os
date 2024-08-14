@@ -2,6 +2,7 @@
 #include "pic.h"
 #include "io.h"
 #include <stddef.h>
+#include "../../stdio.h"
 
 #define PIC_REMAP_OFFSET        0x20
 
