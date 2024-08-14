@@ -14,20 +14,10 @@ void timer(Registers* regs)
     printf(".");
 }
 
-void __attribute__((section(".entry"))) start(uint16_t bootDrive)
-{
+void __attribute__((section(".entry"))) start(uint16_t bootDrive) {
     memset(&__bss_start, 0, (&__end) - (&__bss_start));
 
     HAL_Initialize();
 
-    clrscr();
-
-    printf("Hello from kernel!\n");
-
-    //i686_IRQ_RegisterHandler(0, timer);
-
-    //crash_me();
-
-end:
-    for (;;);
+    printf("Thank you for using nanobyte OS, this is a fork for episode 10\n");
 }

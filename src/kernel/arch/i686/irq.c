@@ -2,7 +2,7 @@
 #include "pic.h"
 #include "io.h"
 #include <stddef.h>
-#include "../../stdio.h"
+#include <stdio.h>
 
 #define PIC_REMAP_OFFSET        0x20
 
@@ -20,9 +20,7 @@ void i686_IRQ_Handler(Registers* regs)
         // handle IRQ
         g_IRQHandlers[irq](regs);
     }
-    else
-    {
-        printf("Unhandled IRQ %d  ISR=%x  IRR=%x...\n", irq, pic_isr, pic_irr);
+    else {
     }
 
     // send EOI
