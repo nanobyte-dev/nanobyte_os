@@ -14,7 +14,7 @@ env.Append(
     ],
     CPPPATH = [
         env.Dir('.').srcnode(),
-        env['ROOTDIR'].Dir('src/libs').srcnode() 
+        env.Dir('#/src/libs').srcnode() 
     ],
     ASFLAGS = [ '-I', env.Dir('.').srcnode() ]
 )

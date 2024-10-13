@@ -61,10 +61,6 @@ HOST_ENVIRONMENT = Environment(variables=VARS,
     STRIP = 'strip',
 )
 
-HOST_ENVIRONMENT.Append(
-    ROOTDIR = HOST_ENVIRONMENT.Dir('.').srcnode()
-)
-
 if HOST_ENVIRONMENT['config'] == 'debug':
     HOST_ENVIRONMENT.Append(CCFLAGS = ['-O0'])
 else:
