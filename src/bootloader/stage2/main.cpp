@@ -14,6 +14,8 @@
 #include <stdint.h>
 #include <memdefs.h>
 
+#include <hal/Hal.hpp>
+
 arch::i686::VGATextDevice g_VGADevice;
 arch::i686::E9Device g_DebugDevice;
 Stage2Allocator g_Allocator(reinterpret_cast<void*>(MEMORY_MIN), MEMORY_MAX - MEMORY_MIN);
@@ -29,6 +31,7 @@ EXPORT void ASMCALL Start(uint16_t bootDrive, uint32_t partition)
     Debug::AddOutputDevice(&debug, Debug::Level::Debug, true);
 
     InstallEtlErrorHandler();
+    Hal::Initialize();
 
     BIOSDisk disk(bootDrive);
     if (!disk.Initialize())
