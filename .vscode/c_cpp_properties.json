@@ -4,9 +4,10 @@
             "name": "GCC",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/../.toolchains/i686-elf/lib/gcc/i686-elf/11.2.0/include"
+                "${workspaceFolder}/../.toolchains/i686-elf/lib/gcc/i686-elf/11.2.0/include",
+                "${workspaceFolder}/../.toolchains/i686-elf/lib/gcc/i686-elf/11.2.0/include-fixed"
             ],
-            "defines": [],
+            "defines": [ "ETL_NO_STL", "ETL_LOG_ERRORS" ],
             "compilerPath": "${workspaceFolder}/../.toolchains/i686-elf/bin/i686-elf-gcc",
             "cStandard": "c99",
             "cppStandard": "c++17",

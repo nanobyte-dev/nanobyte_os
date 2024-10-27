@@ -14,7 +14,11 @@ env.Append(
         '-Wl,-Map=' + env.File('kernel.map').path
     ],
     CPATH = [ env.Dir('.').srcnode() ],
-    CPPPATH = [ env.Dir('.').srcnode() ],
+    CPPPATH = [
+        env.Dir('.').srcnode(),
+        env.Dir('#/src/libs/c').srcnode(),
+        env.Dir('#/src/libs').srcnode() 
+    ],
     ASFLAGS = [ '-I', env.Dir('.').srcnode(), '-f', 'elf' ]
 )
 
@@ -26,9 +30,11 @@ objects = env.Object(sources)
 obj_crti = objects.pop(FindIndex(objects, lambda item: IsFileName(item, 'crti.o')))
 obj_crtn = objects.pop(FindIndex(objects, lambda item: IsFileName(item, 'crtn.o')))
 
+Import('libc')
 Import('libcore')
 
 static_libs = [
+    libc,
     libcore,
 ]
 

@@ -5,7 +5,7 @@
 #include "../fat/FATHeaders.hpp"
 class FATFileSystem;
 
-class FATFileEntry : public FileEntry
+class FATFileEntry : public FSEntry
 {
 public:
     FATFileEntry();

@@ -1,7 +1,7 @@
 #pragma once
 #include "FATHeaders.hpp"
 #include "FATFile.hpp"
-#include "../../mem/StaticObjectPool.hpp"
+#include "core/mem/StaticObjectPool.hpp"
 
 constexpr int MaxFileNameSize = 256;
 constexpr int MaxFileHandles = 10;

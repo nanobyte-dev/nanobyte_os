@@ -9,7 +9,8 @@
 #include <dev/MBR.hpp>
 #include <mem/Stage2Allocator.hpp>
 #include <cpp/NewDelete.hpp>
-#include <core/fs/FATFileSystem.hpp>
+#include <cpp/EtlErrorHandler.hpp>
+//#include <core/fs/FATFileSystem.hpp>
 #include <stdint.h>
 #include <memdefs.h>
 
@@ -20,13 +21,14 @@ Stage2Allocator g_Allocator(reinterpret_cast<void*>(MEMORY_MIN), MEMORY_MAX - ME
 EXPORT void ASMCALL Start(uint16_t bootDrive, uint32_t partition)
 {
     SetCppAllocator(&g_Allocator);
-
     g_VGADevice.Clear();
     
     TextDevice screen(&g_VGADevice);
     Debug::AddOutputDevice(&screen, Debug::Level::Info, false);
     TextDevice debug(&g_DebugDevice);
     Debug::AddOutputDevice(&debug, Debug::Level::Debug, true);
+
+    InstallEtlErrorHandler();
 
     BIOSDisk disk(bootDrive);
     if (!disk.Initialize())
@@ -48,14 +50,15 @@ EXPORT void ASMCALL Start(uint16_t bootDrive, uint32_t partition)
         part = &partRange;
     }
 
-    // Read partition
-    FATFileSystem fs;
-    if (!fs.Initialize(part))
-    {
-        Debug::Critical("stage2", "Failed to initialize FAT file system!");
-    }
 
-    File* kernel = fs.Open("kernel.bin", FileOpenMode::Read);
+    // Read partition
+    // FATFileSystem fs;
+    // if (!fs.Initialize(part))
+    // {
+    //     Debug::Critical("stage2", "Failed to initialize FAT file system!");
+    // }
+
+    // File* kernel = fs.Open("kernel.bin", FileOpenMode::Read);
 
     Debug::Info("stage2", "OK!");
 

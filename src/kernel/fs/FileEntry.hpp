@@ -15,7 +15,7 @@ enum FileOpenMode
     Append
 };
 
-class FileEntry
+class FSEntry
 {
 public:
     virtual void Release() = 0;

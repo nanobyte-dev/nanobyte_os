@@ -1,10 +1,6 @@
 #pragma once
 #include <core/Defs.hpp>
-
-EXPORT const char* strchr(const char* str, char chr);
-EXPORT char* strcpy(char* dst, const char* src);
-EXPORT unsigned strlen(const char* str);
-EXPORT int strcmp(const char* a, const char* b);
+#include <string.h>
 
 namespace String
 {

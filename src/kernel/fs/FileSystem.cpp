@@ -1,6 +1,6 @@
 #include "FileSystem.hpp"
-#include <String.hpp>
-#include <Memory.hpp>
+#include <core/String.hpp>
+#include <core/Memory.hpp>
 
 File* FileSystem::Open(const char* path, FileOpenMode mode)
 {
@@ -32,7 +32,7 @@ File* FileSystem::Open(const char* path, FileOpenMode mode)
             isLast = true;
         }
 
-        FileEntry* nextEntry = FindFile(root, name);
+        FSEntry* nextEntry = FindFile(root, name);
         if (nextEntry)
         {
             // release current
@@ -62,10 +62,10 @@ File* FileSystem::Open(const char* path, FileOpenMode mode)
     return root;
 }
 
-FileEntry* FileSystem::FindFile(File* dir, const char* name)
+FSEntry* FileSystem::FindFile(File* dir, const char* name)
 {
     // find directory entry in current directory
-    FileEntry* entry = dir->ReadFileEntry();
+    FSEntry* entry = dir->ReadFileEntry();
     while (entry != nullptr)
     {
         if (strcmp(entry->Name(), name) == 0)

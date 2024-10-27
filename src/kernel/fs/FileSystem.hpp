@@ -1,5 +1,5 @@
 #pragma once
-#include "../dev/BlockDevice.hpp"
+#include "core/dev/BlockDevice.hpp"
 #include "File.hpp"
 #include "FileEntry.hpp"
 
@@ -15,5 +15,5 @@ public:
     virtual File* Open(const char* path, FileOpenMode mode);
 
 private:
-    virtual FileEntry* FindFile(File* parentDirectory, const char* name);
+    virtual FSEntry* FindFile(File* parentDirectory, const char* name);
 };

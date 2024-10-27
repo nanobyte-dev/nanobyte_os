@@ -1,7 +1,7 @@
 #include "FATFileSystem.hpp"
 #include <fs/fat/FATHeaders.hpp>
 #include <fs/fat/FATFileEntry.hpp>
-#include <Debug.hpp>
+#include <core/Debug.hpp>
 
 #define LOG_MODULE "FAT"
 

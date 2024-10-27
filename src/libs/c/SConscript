@@ -1,7 +1,5 @@
-import os
-
 from SCons.Environment import Environment
-from build_scripts.utility import GlobRecursive, FindIndex, IsFileName
+from build_scripts.utility import GlobRecursive
 
 
 Import('TARGET_ENVIRONMENT')
@@ -11,8 +9,6 @@ env = TARGET_ENVIRONMENT.Clone()
 env.Append(
     CPPPATH = [ 
         env.Dir('.').srcnode(),
-        env.Dir('#/src/libs/c').srcnode(),
-        env.Dir('#/src/libs').srcnode(),
     ],
     ASFLAGS = [ '-I', env.Dir('.').srcnode(), '-f', 'elf' ]
 )
@@ -23,6 +19,6 @@ sources = GlobRecursive(env, '*.c') + \
 
 objects = env.Object(sources)
 
-libcore = env.StaticLibrary('libcore.o', objects)
+libc = env.StaticLibrary('libc.o', objects)
 
-Export('libcore')
+Export('libc')

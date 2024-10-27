@@ -24,7 +24,7 @@ public:
     virtual size_t Size() override { return m_Size; }
     virtual size_t Position() override { return m_Position; }
     
-    virtual FileEntry* ReadFileEntry() override;
+    virtual FSEntry* ReadFileEntry() override;
     
 
 private:

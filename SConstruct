@@ -120,6 +120,9 @@ TARGET_ENVIRONMENT.Append(
         '-ffreestanding',
         '-nostdlib'
     ],
+    CPPPATH = [
+        TARGET_ENVIRONMENT.Dir("thirdparty/etl/include").srcnode()
+    ],
     CXXFLAGS = [
         '-fno-exceptions',
         '-fno-rtti',
@@ -140,6 +143,7 @@ Export('TARGET_ENVIRONMENT')
 variantDir = 'build/{0}_{1}'.format(TARGET_ENVIRONMENT['arch'], TARGET_ENVIRONMENT['config'])
 variantDirStage1 = variantDir + '/stage1_{0}'.format(TARGET_ENVIRONMENT['imageFS'])
 
+SConscript('src/libs/c/SConscript', variant_dir=variantDir + '/libs/c', duplicate=0)
 SConscript('src/libs/core/SConscript', variant_dir=variantDir + '/libs/core', duplicate=0)
 
 SConscript('src/bootloader/stage1/SConscript', variant_dir=variantDirStage1, duplicate=0)

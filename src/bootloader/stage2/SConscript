@@ -12,9 +12,15 @@ env.Append(
         '-Wl,-T', env.File('linker.ld').srcnode().path,
         '-Wl,-Map=' + env.File('stage2.map').path
     ],
+    CPPDEFINES = [
+        'ETL_NO_STL',
+        'ETL_LOG_ERRORS',
+    ],
     CPPPATH = [
         env.Dir('.').srcnode(),
-        env.Dir('#/src/libs').srcnode() 
+        env.Dir('#/src/libs/c').srcnode(),
+        env.Dir('#/src/libs').srcnode(),
+        env.Dir('#/thirdparty/etl/include').srcnode(),
     ],
     ASFLAGS = [ '-I', env.Dir('.').srcnode() ]
 )
@@ -32,9 +38,11 @@ objects = env.Object(sources)
 obj_crti = objects.pop(FindIndex(objects, lambda item: IsFileName(item, 'crti.o')))
 obj_crtn = objects.pop(FindIndex(objects, lambda item: IsFileName(item, 'crtn.o')))
 
+Import('libc')
 Import('libcore')
 
 static_libs = [
+    libc,
     libcore,
 ]
 

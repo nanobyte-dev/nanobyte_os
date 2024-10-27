@@ -190,7 +190,7 @@ bool FATFile::UpdateCurrentCluster()
     return m_FS->ReadSectorFromCluster(m_CurrentCluster, m_CurrentSectorInCluster, m_Buffer);
 }
 
-FileEntry* FATFile::ReadFileEntry()
+FSEntry* FATFile::ReadFileEntry()
 {
     FATDirectoryEntry entry;
     if (ReadFileEntry(&entry))
