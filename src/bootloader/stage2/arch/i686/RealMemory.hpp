@@ -1,6 +1,8 @@
 #pragma once
 #include <stdint.h>
 
+namespace arch::i686 {
+
 template <typename T>
 uint32_t ToSegOffset(T addr)
 {
@@ -16,4 +18,6 @@ T ToLinear(uint32_t addr)
     uint32_t offset = (uint32_t)(addr) & 0xFFFF;
     uint32_t segment = (uint32_t)(addr) >> 16;
     return T(segment * 16 + offset);
+}
+
 }

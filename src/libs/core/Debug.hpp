@@ -1,5 +1,4 @@
 #pragma once
-#include <core/dev/TextDevice.hpp>
 
 namespace Debug
 {
@@ -11,8 +10,6 @@ namespace Debug
         Error = 3,
         Critical = 4
     };
-
-    void AddOutputDevice(TextDevice* device, Level minLogLevel, bool colorOutput);
 
     void Debug(const char* module, const char* fmt, ...);
     void Info(const char* module, const char* fmt, ...);

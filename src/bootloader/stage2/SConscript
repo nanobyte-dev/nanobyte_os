@@ -58,4 +58,6 @@ objects = [
 stage2 = env.Program('stage2.elf', objects)
 env.Depends(stage2, headers)
 
+stage2_stripped = env.Command('stage2-stripped.elf', stage2, '$STRIP -o $TARGET $SOURCE')
+
 Export('stage2')

@@ -14,10 +14,15 @@ env.Append(
         '-Wl,-Map=' + env.File('kernel.map').path
     ],
     CPATH = [ env.Dir('.').srcnode() ],
+    CPPDEFINES = [
+        'ETL_NO_STL',
+        'ETL_LOG_ERRORS',
+    ],
     CPPPATH = [
         env.Dir('.').srcnode(),
         env.Dir('#/src/libs/c').srcnode(),
-        env.Dir('#/src/libs').srcnode() 
+        env.Dir('#/src/libs').srcnode(),
+        env.Dir('#/thirdparty/etl/include').srcnode(),
     ],
     ASFLAGS = [ '-I', env.Dir('.').srcnode(), '-f', 'elf' ]
 )

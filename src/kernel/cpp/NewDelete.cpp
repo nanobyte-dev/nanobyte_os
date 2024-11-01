@@ -35,3 +35,9 @@ void operator delete[](void *p)
     if (g_CppAllocator)
         g_CppAllocator->Free(p);
 }
+
+void operator delete(void* p, unsigned long)
+{
+    if (g_CppAllocator)
+        g_CppAllocator->Free(p);
+}
