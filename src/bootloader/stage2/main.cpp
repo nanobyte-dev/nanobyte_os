@@ -9,14 +9,37 @@
 #include <memdefs.h>
 
 #include <hal/Hal.hpp>
+#include <etl/string.h>
 
 Stage2Allocator g_Allocator(reinterpret_cast<void*>(MEMORY_MIN), MEMORY_MAX - MEMORY_MIN);
+
+void PrintFS(hal::fs::FSNode* root, int indent, ErrorChain& err)
+{
+    if (root == nullptr)
+        return;
+
+    etl::string<1024> fmt;
+    for (int i = 0; i < indent; i++)
+        fmt.append("  ");
+    fmt.append("> ");
+    fmt.append(root->Name().data(), root->Name().size());
+    Debug::Info("main", "%s", fmt.data());
+
+    for (hal::fs::FSNode* node = root->FirstChild(err); node != nullptr; node = node->NextSibling(err))
+    {
+        PrintFS(node, indent + 1, err);
+    }
+}
 
 EXPORT void ASMCALL Start(uint16_t bootDrive, uint32_t bootPartition)
 {
     SetCppAllocator(&g_Allocator);
     InstallEtlErrorHandler();
     hal::Hal::Initialize(bootDrive, bootPartition);
+
+    // print file structure
+    ErrorChain err;
+    PrintFS(hal::Hal::GetVFS().RootDirectory(err), 0, err);
 
     // Handle partitioned disks
     // File* part;

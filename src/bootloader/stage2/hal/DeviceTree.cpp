@@ -61,7 +61,9 @@ fs::FSNode* DeviceTree::AttachDeviceInternal(DeviceFSNode *node, etl::string_vie
         node->Rename(name, err);
         m_Root.AddChild(node, err);
 
-        if (err.Failed() && err.LastError() == ResultCode::AlreadyExists)
+        if (!err.Failed())
+            break;
+        if (err.LastError() == ResultCode::AlreadyExists)
             err.Clear();
         err.FailOnError(ResultCode::IOFailed, "Failed to attach device");
 

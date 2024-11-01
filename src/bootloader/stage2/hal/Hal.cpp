@@ -38,7 +38,7 @@ namespace hal::Hal
         if (!screen)
             return;
         
-        auto debug = g_DeviceTree.AttachDevice(&g_DebugDevice, "debug", err);
+        auto debug = g_DeviceTree.AttachDevice(&g_DebugDevice, "Debug", err);
         if (!debug)
             return;
         auto debugFile = debug->Open(fs::FileOpenMode::Write, err);
@@ -76,5 +76,10 @@ namespace hal::Hal
     DeviceTree& GetDeviceTree()
     {
         return g_DeviceTree;
+    }
+
+    VirtualFileSystem &GetVFS()
+    {
+        return g_VirtualFileSystem;
     }
 }

@@ -43,6 +43,7 @@ void VirtualFileSystem::Mount(const etl::string_view& mountPoint, fs::FileSystem
 
     auto str = m_Names.emplace_back(mountPoint);
     m_MountPoints[str] = fs;
+    fs->RootDirectory(err)->Rename(mountPoint, err);
 }
 
 void VirtualFileSystem::Mount(const etl::string_view& mountPoint, fs::File* device, const etl::string_view& options, ErrorChain& err)
