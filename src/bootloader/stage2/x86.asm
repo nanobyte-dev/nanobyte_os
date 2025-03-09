@@ -274,7 +274,7 @@ x86_E820GetNextBlock:
     LinearToSegOffset [bp + 8], es, edi, di     ; es:di pointer to structure
     
     LinearToSegOffset [bp + 12], ds, esi, si    ; ebx - pointer to continuationId
-    mov ebx, ds:[si]
+    mov ebx, [ds:si]
 
     mov eax, 0xE820                             ; eax - function
     mov edx, E820Signature                      ; edx - signature
@@ -289,7 +289,7 @@ x86_E820GetNextBlock:
 
     .IfSuccedeed:
         mov eax, ecx            ; return size
-        mov ds:[si], ebx        ; fill continuation parameter
+        mov [ds:si], ebx        ; fill continuation parameter
         jmp .EndIf
 
     .Error:
