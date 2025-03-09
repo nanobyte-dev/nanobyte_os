@@ -1,3 +1,9 @@
+# basic_os
+
+My work in progress.  First step is getting the keyboard controller fully operational, then I can start working on parsing user input into something interesting.
+
+---
+
 # nanobyte_os
 This repository contains the code from the ["Building an OS"](https://www.youtube.com/watch?v=9t-SPC7Tczc&list=PLFjM7v6KGMpiH2G-kT781ByCNC_0pKpPN) series on the ["Nanobyte"](https://www.youtube.com/channel/UCSPIuWADJIMIf9Erf--XAsA) YouTube channel.
 
@@ -19,6 +25,11 @@ paru -S gcc make bison flex libgmp-static libmpc mpfr texinfo nasm mtools qemu-s
 ```
 NOTE: to install all the required packages on Arch, you need an [AUR helper](https://wiki.archlinux.org/title/AUR_helpers).
 
+I had to run this to get guestmount to work without sudo:
+```bash
+sudo dpkg-statoverride --update --add root root 0644 /boot/vmlinuz-`uname -r`
+```
+
 Then you must run `python3 -m pip install -r requirements.txt`
 
 Next, modify the configuration in `build_scripts/config.py`. The most important is the `toolchain='../.toolchains'` option which sets where the toolchain will be downloaded and built. The default option is in the directory above where the repo is cloned, in a .toolchains directory, but you will get an error if this directory doesn't exist.
@@ -31,3 +42,4 @@ Finally, you should be able to run `scons`. Use `scons run` to test your OS usin
 
 * [Discord channel](https://discord.gg/RgHc5XrCEw)
 * [Patreon](https://www.patreon.com/nanobyte)
+
