@@ -48,7 +48,7 @@ void i686_IRQ_Initialize()
         return;
     }
 
-    log_info(MODULE, "Found %s PIC.", g_Driver->Name);
+    log_info(MODULE, "Found %s.", g_Driver->Name);
     g_Driver->Initialize(PIC_REMAP_OFFSET, PIC_REMAP_OFFSET + 8, false);
 
     // register ISR handlers for each of the 16 irq lines
@@ -57,12 +57,10 @@ void i686_IRQ_Initialize()
 
     // enable interrupts
     i686_EnableInterrupts();
-
-    // g_Driver->Unmask(0);
-    // g_Driver->Unmask(1);
 }
 
 void i686_IRQ_RegisterHandler(int irq, IRQHandler handler)
 {
     g_IRQHandlers[irq] = handler;
+    g_Driver->Unmask(irq);
 }
