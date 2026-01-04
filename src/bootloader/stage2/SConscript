@@ -1,0 +1,50 @@
+import os
+
+from SCons.Environment import Environment
+from build_scripts.utility import GlobRecursive, FindIndex, IsFileName
+
+Import('TARGET_ENVIRONMENT')
+TARGET_ENVIRONMENT: Environment
+
+env = TARGET_ENVIRONMENT.Clone()
+env.Append(
+    LINKFLAGS = [
+        '-Wl,-T', env.File('linker.ld').srcnode().path,
+        '-Wl,-Map=' + env.File('stage2.map').path
+    ],
+    CPPPATH = [ 
+        env.Dir('.').srcnode(),
+        env['PROJECTDIR'].Dir('src/libs')
+    ],
+    ASFLAGS = [ 
+        '-I', env.Dir('.').srcnode(),
+    ]
+)
+
+sources = GlobRecursive(env, '*.c') + \
+          GlobRecursive(env, '*.cpp') + \
+          GlobRecursive(env, '*.asm')
+
+objects = env.Object(sources)
+
+obj_crti = objects.pop(FindIndex(objects, lambda item: IsFileName(item, 'crti.o')))
+obj_crtn = objects.pop(FindIndex(objects, lambda item: IsFileName(item, 'crtn.o')))
+
+Import('libcore')
+
+static_libs = [
+    libcore,
+]
+
+objects = [
+    obj_crti,
+    os.path.join(env["TOOLCHAIN_LIBGCC"], 'crtbegin.o'),
+    *objects,
+    *static_libs,
+    os.path.join(env["TOOLCHAIN_LIBGCC"], 'crtend.o'),
+    obj_crtn
+]
+
+stage2 = env.Program('stage2.bin', objects)
+
+Export('stage2')
