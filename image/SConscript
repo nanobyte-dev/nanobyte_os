@@ -194,7 +194,15 @@ def build_floppy(image, stage1, stage2, kernel, files, env):
     copy_files_mtools(image, image_files(kernel, files, env))
 
 
-def create_partition_table(target: str, align_start: int):
+# MBR partition type for each file system
+PARTITION_TYPES = {
+    'fat12': 0x01,
+    'fat16': 0x0E,      # FAT16, LBA addressing
+    'fat32': 0x0C,      # FAT32, LBA addressing
+    'ext2':  0x83,      # Linux
+}
+
+def create_partition_table(target: str, align_start: int, filesystem: str):
     device = parted.getDevice(target)
     disk = parted.freshDisk(device, 'msdos')
     freeSpace = disk.getFreeSpaceRegions()
@@ -203,6 +211,12 @@ def create_partition_table(target: str, align_start: int):
     partition.setFlag(parted.PARTITION_BOOT)
     disk.addPartition(partition, constraint=device.optimalAlignedConstraint)
     disk.commit()
+
+    # parted marks the partition as Linux (0x83) unless told otherwise, and has no type for FAT12,
+    # so write the type byte (offset 4 in the first partition entry) ourselves
+    with os.fdopen(os.open(target, os.O_WRONLY), 'wb') as ftarget:
+        ftarget.seek(446 + 4, SEEK_SET)
+        ftarget.write(bytes([PARTITION_TYPES[filesystem]]))
 
 
 def mount_fs(image: str, mount_dir: str, mount_method: str):
@@ -249,7 +263,7 @@ def build_disk(image, mbr, stage1, stage2, kernel, files, env):
 
     # create partition table
     print(f"> creating partition table...")
-    create_partition_table(image, partition_offset)
+    create_partition_table(image, partition_offset, file_system)
 
     print(f"> installing MBR...")
     install_mbr(image, mbr)
