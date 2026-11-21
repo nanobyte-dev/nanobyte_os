@@ -12,6 +12,19 @@ TARGET=i686-elf
 
 set -e
 
+# Downloads a file, unless it's already there (e.g. after a build that failed halfway).
+# Downloads to a .part file first, so an interrupted download isn't mistaken for a complete one.
+download() {
+    local file
+    file=$(basename "$1")
+    if [ -f "$file" ]; then
+        echo "Already downloaded: $file"
+        return
+    fi
+    wget -O "$file.part" "$1"
+    mv "$file.part" "$file"
+}
+
 TOOLCHAINS_DIR=
 OPERATION='build'
 
@@ -41,7 +54,7 @@ if [ "$OPERATION" = "build" ]; then
     BINUTILS_SRC="binutils-${BINUTILS_VERSION}"
     BINUTILS_BUILD="binutils-build-${BINUTILS_VERSION}"
 
-    wget ${BINUTILS_URL}
+    download ${BINUTILS_URL}
     tar -xf binutils-${BINUTILS_VERSION}.tar.xz
 
     mkdir -p ${BINUTILS_BUILD}
@@ -60,7 +73,7 @@ if [ "$OPERATION" = "build" ]; then
     GCC_SRC="gcc-${GCC_VERSION}"
     GCC_BUILD="gcc-build-${GCC_VERSION}"
 
-    wget ${GCC_URL}
+    download ${GCC_URL}
     tar -xf gcc-${GCC_VERSION}.tar.xz
     mkdir -p ${GCC_BUILD}
     pushd ${GCC_BUILD}
