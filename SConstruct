@@ -4,6 +4,9 @@ from SCons.Environment import *
 from SCons.Node import *
 from build_scripts.phony_targets import PhonyTargets
 from build_scripts.utility import ParseSize, RemoveSuffix
+from build_scripts.nasm_scanner import RegisterNasmScanner
+
+RegisterNasmScanner()
 
 VARS = Variables('build_scripts/config.py', ARGUMENTS)
 VARS.AddVariables(
