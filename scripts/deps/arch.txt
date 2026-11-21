@@ -1,0 +1,28 @@
+# Arch Linux and derivatives (pacman)
+# Used by scripts/install_deps.sh. One package per line, '#' starts a comment.
+
+# building the cross compiler (scripts/setup_toolchain.sh)
+gcc
+make
+bison
+flex
+gmp
+libmpc
+mpfr
+texinfo
+wget
+
+# building the OS
+nasm
+scons
+python
+python-sh
+python-pyparted
+
+# building the disk image (image/SConscript)
+mtools
+dosfstools
+libguestfs
+
+# running
+qemu-system-x86

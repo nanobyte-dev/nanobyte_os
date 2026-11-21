@@ -1,0 +1,27 @@
+# Debian, Ubuntu and derivatives (apt)
+# Used by scripts/install_deps.sh. One package per line, '#' starts a comment.
+
+# building the cross compiler (scripts/setup_toolchain.sh)
+build-essential
+bison
+flex
+libgmp3-dev
+libmpc-dev
+libmpfr-dev
+texinfo
+wget
+
+# building the OS
+nasm
+scons
+python3
+python3-sh
+python3-parted
+
+# building the disk image (image/SConscript)
+mtools
+dosfstools
+libguestfs-tools
+
+# running
+qemu-system-x86

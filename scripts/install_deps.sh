@@ -1,141 +1,91 @@
 #!/usr/bin/env bash
-DEPS_ALPINE=(
-    build-base
-    gmp-dev
-    mpc
-    mpfr-dev
-    bison
-    flex
-    texinfo
-    nasm
-    mtools
-    qemu-system-x86_64
-    python3
-    py3-pip
-    scons
-    py3-parted
-    py3-sh
-)
+# Installs the packages needed to build and run nanobyte_os.
+# The package lists are in scripts/deps/<distro>.txt.
+#
+# Usage: install_deps.sh [-y]
+#   -y   don't ask for confirmation (for scripts and containers)
 
-DEPS_DEBIAN=(
-    build-essential
-    bison
-    flex
-    libgmp3-dev
-    libmpc-dev
-    libmpfr-dev
-    texinfo
-    wget
-    nasm
-    mtools
-    dosfstools
-    libguestfs-tools
-    qemu-system-x86
-    python3
-    python3-pip
-    python3-parted
-    scons
-)
+set -e
 
-DEPS_FEDORA=(
-    gcc
-    gcc-c++
-    make
-    bison
-    flex
-    gmp-devel
-    libmpc-devel
-    mpfr-devel
-    texinfo
-    wget
-    nasm
-    mtools
-    dosfstools
-    guestfs-tools
-    qemu-system-x86
-    python3
-    python3-pip
-    python3-pyparted
-    python3-scons
-)
+DEPS_DIR="$(dirname "$(readlink -f "$0")")/deps"
 
-DEPS_ARCH=(
-    gcc
-    make
-    bison
-    flex
-    gmp
-    libmpc
-    mpfr
-    texinfo
-    wget
-    nasm
-    mtools
-    dosfstools
-    libguestfs
-    qemu-system-x86
-    python
-    python-pip
-    python-pyparted
-    scons
-)
-
-DEPS_SUSE=()
-
-OS=
-PACKAGE_UPDATE=
-PACKAGE_INSTALL=
-DEPS=
+ASSUME_YES=
+if [ "$1" = "-y" ]; then
+    ASSUME_YES=1
+fi
 
 # Detect distro
+PACKAGE_UPDATE=
 if [ -x "$(command -v apk)" ]; then
-    OS='alpine'
-    PACKAGE_UPDATE='apk update'
-    PACKAGE_INSTALL='apk add --no-cache'
     echo "Alpine not supported."
     exit 1
 elif [ -x "$(command -v apt-get)" ]; then
-    OS='debian'
+    DISTRO='debian'
     PACKAGE_UPDATE='apt-get update'
-    PACKAGE_INSTALL='apt-get install'
-    DEPS="${DEPS_DEBIAN[@]}"
+    PACKAGE_INSTALL="apt-get install ${ASSUME_YES:+-y}"
 elif [ -x "$(command -v dnf)" ]; then
-    OS='fedora'
-    PACKAGE_INSTALL='dnf install'
-    DEPS="${DEPS_FEDORA[@]}"
+    DISTRO='fedora'
+    PACKAGE_INSTALL="dnf install ${ASSUME_YES:+-y}"
 elif [ -x "$(command -v yum)" ]; then
-    OS='fedora'
-    PACKAGE_INSTALL='yum install'
-    DEPS="${DEPS_FEDORA[@]}"
+    DISTRO='fedora'
+    PACKAGE_INSTALL="yum install ${ASSUME_YES:+-y}"
 elif [ -x "$(command -v zypper)" ]; then
-    OS='suse'
-    PACKAGE_INSTALL='zypper install'
-    echo "openSUSE not supported yet."
-    exit 1
+    DISTRO='opensuse'
+    if grep -q '^ID="\?opensuse-leap' /etc/os-release 2>/dev/null; then
+        DISTRO='opensuse-leap'
+    fi
+    PACKAGE_INSTALL="zypper ${ASSUME_YES:+--non-interactive} install"
 elif [ -x "$(command -v pacman)" ]; then
-    OS='arch'
-    PACKAGE_UPDATE='pacman -Syy'
-    PACKAGE_INSTALL='pacman -S'
-    DEPS="${DEPS_ARCH[@]}"
+    DISTRO='arch'
+    # -Syu: installing without upgrading is a partial upgrade, which Arch doesn't support
+    PACKAGE_INSTALL="pacman -Syu --needed ${ASSUME_YES:+--noconfirm}"
 else
     echo "Unknown operating system!"
     exit 1
 fi
 
-# Install dependencies
+# Read the package list, without comments and empty lines.
+# 'pip:<name>' lines are for Python packages the distro doesn't have.
+LIST=($(sed -e 's/#.*//' "$DEPS_DIR/$DISTRO.txt"))
+DEPS=()
+PIP_DEPS=()
+for item in "${LIST[@]}"; do
+    case "$item" in
+        pip:*) PIP_DEPS+=("${item#pip:}") ;;
+        *)     DEPS+=("$item") ;;
+    esac
+done
+
+# Package managers need root
+SUDO=
+if [ "$(id -u)" -ne 0 ]; then
+    SUDO='sudo'
+fi
+
 echo ""
 echo "Will install dependencies by running the following command."
 echo ""
-echo " $ $PACKAGE_INSTALL ${DEPS[@]}"
+echo " \$ $SUDO $PACKAGE_INSTALL ${DEPS[*]}"
+if [ ${#PIP_DEPS[@]} -gt 0 ]; then
+    echo " \$ python3 -m pip install --user ${PIP_DEPS[*]}"
+fi
 echo ""
 
-read -p "Continue (y/n)?" choice
-case "$choice" in 
-  y|Y ) ;;
-  * ) echo "Exiting..."
-        exit 0
-        ;;
-esac
+if [ -z "$ASSUME_YES" ]; then
+    read -p "Continue (y/n)?" choice
+    case "$choice" in
+      y|Y ) ;;
+      * ) echo "Exiting..."
+          exit 0
+          ;;
+    esac
+fi
 
-$PACKAGE_UPDATE
-$PACKAGE_INSTALL ${DEPS[@]}
+if [ -n "$PACKAGE_UPDATE" ]; then
+    $SUDO $PACKAGE_UPDATE
+fi
+$SUDO $PACKAGE_INSTALL "${DEPS[@]}"
+
+if [ ${#PIP_DEPS[@]} -gt 0 ]; then
+    python3 -m pip install --user "${PIP_DEPS[@]}"
+fi
