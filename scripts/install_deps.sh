@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 DEPS_ALPINE=(
     build-base
     gmp-dev
