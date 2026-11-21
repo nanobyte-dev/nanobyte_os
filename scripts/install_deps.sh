@@ -95,14 +95,16 @@ elif [ -x "$(command -v yum)" ]; then
 elif [ -x "$(command -v zypper)" ]; then
     OS='suse'
     PACKAGE_INSTALL='zypper install'
-    DEPS="$DEPS_SUSE"
+    echo "openSUSE not supported yet."
+    exit 1
 elif [ -x "$(command -v pacman)" ]; then
     OS='arch'
     PACKAGE_UPDATE='pacman -Syy'
     PACKAGE_INSTALL='pacman -S'
     DEPS="${DEPS_ARCH[@]}"
 else
-    echo "Unknown operating system!"; 
+    echo "Unknown operating system!"
+    exit 1
 fi
 
 # Install dependencies
