@@ -52,7 +52,7 @@ if [ "$OPERATION" = "build" ]; then
         --with-sysroot					\
         --disable-nls					\
         --disable-werror
-    make -j8 
+    make -j"$(nproc)"
     make install
     popd
 
@@ -70,7 +70,7 @@ if [ "$OPERATION" = "build" ]; then
         --disable-nls					\
         --enable-languages=c,c++		\
         --without-headers
-    make -j8 all-gcc all-target-libgcc
+    make -j"$(nproc)" all-gcc all-target-libgcc
     make install-gcc install-target-libgcc
     popd
 
