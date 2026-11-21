@@ -293,8 +293,10 @@ output_fmt = 'img'
 
 output = f'image.{output_fmt}'
 
+# varlist: also rebuild when the image options change, not just the input files
 image = env.Command(output, inputs,
-                    action=Action(build_image, 'Creating disk image...'), 
+                    action=Action(build_image, 'Creating disk image...',
+                                  varlist=['imageType', 'imageFS', 'imageSize', 'mountMethod']),
                     BASEDIR=root.srcnode().path)
 env.Depends(image, inputs)
 
