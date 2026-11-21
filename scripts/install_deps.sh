@@ -19,33 +19,43 @@ DEPS_ALPINE=(
 
 DEPS_DEBIAN=(
     build-essential
-    bison 
-    flex 
-    libgmp3-dev 
-    libmpc-dev 
-    libmpfr-dev 
-    texinfo 
-    nasm 
-    mtools 
-    qemu-system-x86 
-    python3-pip 
-    python3-scons
+    bison
+    flex
+    libgmp3-dev
+    libmpc-dev
+    libmpfr-dev
+    texinfo
+    wget
+    nasm
+    mtools
+    dosfstools
+    libguestfs-tools
+    qemu-system-x86
+    python3
+    python3-pip
+    python3-parted
+    scons
 )
 
 DEPS_FEDORA=(
-    gcc 
-    gcc-c++ 
-    make 
-    bison 
-    flex 
-    gmp-devel 
-    libmpc-devel 
-    mpfr-devel 
-    texinfo 
-    nasm 
-    mtools 
-    qemu-system-x86 
-    python3-pip 
+    gcc
+    gcc-c++
+    make
+    bison
+    flex
+    gmp-devel
+    libmpc-devel
+    mpfr-devel
+    texinfo
+    wget
+    nasm
+    mtools
+    dosfstools
+    guestfs-tools
+    qemu-system-x86
+    python3
+    python3-pip
+    python3-pyparted
     python3-scons
 )
 
@@ -54,14 +64,19 @@ DEPS_ARCH=(
     make
     bison
     flex
-    libgmp-static
+    gmp
     libmpc
     mpfr
     texinfo
+    wget
     nasm
     mtools
+    dosfstools
+    libguestfs
     qemu-system-x86
-    python3-pip
+    python
+    python-pip
+    python-pyparted
     scons
 )
 
