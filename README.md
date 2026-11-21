@@ -53,7 +53,7 @@ Another important variable is `mountMethod`. See the section below for details.
 
 4. Run `scons toolchain`, this should download and build the required tools (binutils and GCC). If you encounter errors during this step, you might have to modify `scripts/setup_toolchain.sh` and try a different version of **binutils** and **gcc**. Using the same version as the one bundled with your distribution is your best bet.
 
-5. Run `scons`. Type your sudo password when prompted, this is required for running `losetup`, `mount`, `umount`.
+5. Run `scons`. If you are using the `mount` method, type your sudo password when prompted, this is required for running `losetup`, `mount`, `umount`.
 
 ### Mount methods
 

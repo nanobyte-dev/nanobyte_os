@@ -222,12 +222,15 @@ def build_disk(image, stage1, stage2, kernel, files, env):
 
     tempdir_name = 'tmp_mount_{0}'.format(int(time.time()))
     tempdir = os.path.join('/tmp', tempdir_name)
+    mounted = False
+    mount_token = None
     try:
         # mount
         os.mkdir(tempdir)
 
         print(f"> mounting image to {tempdir}...")
         mount_token = mount_fs(image, tempdir, mount_method)
+        mounted = True
 
         # copy kernel
         print(f"> copying kernel...")
@@ -252,14 +255,16 @@ def build_disk(image, stage1, stage2, kernel, files, env):
 
     finally:
         print("> cleaning up...")
-        for tries in range(5):
+        # only unmount if mounting worked, otherwise the real error gets buried under retries
+        for tries in range(5 if mounted else 0):
             try:
                 unmount_fs(tempdir, mount_method, mount_token)
                 break
             except BaseException as ex:
                 print('    ... attempt', tries, 'to unmount failed:', ex)
                 time.sleep(5)
-        os.rmdir(tempdir)
+        if os.path.isdir(tempdir):
+            os.rmdir(tempdir)
 
 
 def build_image(target, source, env):
