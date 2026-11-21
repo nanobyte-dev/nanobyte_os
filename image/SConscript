@@ -300,4 +300,8 @@ image = env.Command(output, inputs,
                     BASEDIR=root.srcnode().path)
 env.Depends(image, inputs)
 
+# build_image's own code is tracked, but not the code of the functions it calls, so rebuild the
+# image whenever this script changes
+env.Depends(image, env.File('SConscript').srcnode())
+
 Export('image')
