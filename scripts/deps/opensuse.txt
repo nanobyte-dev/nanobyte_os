@@ -1,0 +1,30 @@
+# openSUSE Tumbleweed (zypper); Leap uses opensuse-leap.txt
+# Used by scripts/install_deps.sh. One package per line, '#' starts a comment.
+
+# building the cross compiler (scripts/setup_toolchain.sh)
+# (makeinfo instead of texinfo: on openSUSE, texinfo pulls in all of TeX Live)
+gcc
+gcc-c++
+make
+bison
+flex
+gmp-devel
+mpc-devel
+mpfr-devel
+makeinfo
+wget
+
+# building the OS
+nasm
+scons
+python3
+python3-sh
+python3-parted
+
+# building the disk image (image/SConscript)
+mtools
+dosfstools
+# optional, only for mountMethod = guestfs: guestfs-tools
+
+# running
+qemu-x86

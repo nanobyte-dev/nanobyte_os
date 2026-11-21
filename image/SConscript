@@ -15,6 +15,7 @@ from SCons.Environment import Environment
 
 from build_scripts.utility import FindIndex, GlobRecursive, IsFileName
 
+Import('mbr')
 Import('stage1')
 Import('stage2')
 Import('kernel')
@@ -76,6 +77,24 @@ def find_symbol_in_map_file(map_file: str, symbol: str):
     return None
 
 
+def install_mbr(target: str, mbr: str):
+    """
+    Writes the MBR boot code into the first sector, in front of the partition table.
+    Older versions of libparted wrote a generic MBR there for us, libparted 3.8 doesn't anymore.
+    """
+    with open(mbr, 'rb') as fmbr:
+        code = fmbr.read()
+
+    # the disk signature (offset 440) and partition table (offset 446) come after the code
+    if len(code) > 440:
+        raise ValueError(f"MBR code is {len(code)} bytes, only 440 fit in front of the partition table")
+
+    with os.fdopen(os.open(target, os.O_WRONLY | os.O_CREAT), 'wb+') as ftarget:
+        ftarget.seek(0, SEEK_SET)
+        # pad with zeros, so nothing from a previous MBR is left behind
+        ftarget.write(code.ljust(440, b'\0'))
+
+
 def install_stage1(target: str, stage1: str, stage2_offset, stage2_size, offset=0):
     # find stage1 map file
     map_file = Path(stage1).with_suffix('.map')
@@ -115,6 +134,46 @@ def install_stage2(target: str, stage2: str, offset=0, limit=None):
             ftarget.seek(offset * SECTOR_SIZE, SEEK_SET)
             ftarget.write(fstage2.read())
 
+def image_files(kernel, files, env):
+    """
+    What goes into the file system: the kernel in /boot, and everything under image/root.
+    Returns (path in the image, source path or None for a directory) pairs, parents first.
+    """
+    entries = [('boot', None), ('boot/' + os.path.basename(kernel), kernel)]
+    src_root = env['BASEDIR']
+    for file in files:
+        file_src = file.srcnode().path
+        file_rel = os.path.relpath(file_src, src_root)
+        entries.append((file_rel, None if os.path.isdir(file_src) else file_src))
+    return entries
+
+
+def copy_files_mtools(image: str, entries, offset=0):
+    """Copies files into a FAT partition with mtools, without mounting it."""
+    # mtools addresses a partition inside a disk image as image@@<byte offset>
+    target = image if offset == 0 else f'{image}@@{offset * SECTOR_SIZE}'
+    # skip mtools' sanity check on the disk geometry, which an image file doesn't have
+    mtools_env = dict(os.environ, MTOOLS_SKIP_CHECK='1')
+    for path, src in entries:
+        if src is None:
+            print('    ... creating directory', path)
+            sh.mmd('-i', target, '::' + path, _env=mtools_env)
+        else:
+            print('    ... copying', path)
+            sh.mcopy('-i', target, src, '::' + path, _env=mtools_env)
+
+
+def copy_files_to_dir(root: str, entries):
+    for path, src in entries:
+        dst = os.path.join(root, path)
+        if src is None:
+            print('    ... creating directory', path)
+            os.makedirs(dst, exist_ok=True)
+        else:
+            print('    ... copying', path)
+            copy2(src, dst)
+
+
 def build_floppy(image, stage1, stage2, kernel, files, env):
     size_sectors = 2880
     stage2_size = os.stat(stage2).st_size
@@ -132,26 +191,18 @@ def build_floppy(image, stage1, stage2, kernel, files, env):
     install_stage2(image, stage2, offset=1)
 
     print(f"> copying files...")
-    print('    ... copying', kernel)
-    sh.mmd('-i', image, "::boot")
-    sh.mcopy('-i', image, kernel, "::boot/")
-
-    # copy rest of files
-    src_root = env['BASEDIR']
-    for file in files:
-        file_src = file.srcnode().path
-        file_rel = os.path.relpath(file_src, src_root)
-        file_dst = '::' + file_rel
-
-        if os.path.isdir(file_src):
-            print('    ... creating directory', file_rel)
-            sh.mmd('-i', image, file_dst)
-        else:
-            print('    ... copying', file_rel)
-            sh.mcopy('-i', image, file_src, file_dst)
+    copy_files_mtools(image, image_files(kernel, files, env))
 
 
-def create_partition_table(target: str, align_start: int):
+# MBR partition type for each file system
+PARTITION_TYPES = {
+    'fat12': 0x01,
+    'fat16': 0x0E,      # FAT16, LBA addressing
+    'fat32': 0x0C,      # FAT32, LBA addressing
+    'ext2':  0x83,      # Linux
+}
+
+def create_partition_table(target: str, align_start: int, filesystem: str):
     device = parted.getDevice(target)
     disk = parted.freshDisk(device, 'msdos')
     freeSpace = disk.getFreeSpaceRegions()
@@ -160,6 +211,12 @@ def create_partition_table(target: str, align_start: int):
     partition.setFlag(parted.PARTITION_BOOT)
     disk.addPartition(partition, constraint=device.optimalAlignedConstraint)
     disk.commit()
+
+    # parted marks the partition as Linux (0x83) unless told otherwise, and has no type for FAT12,
+    # so write the type byte (offset 4 in the first partition entry) ourselves
+    with os.fdopen(os.open(target, os.O_WRONLY), 'wb') as ftarget:
+        ftarget.seek(446 + 4, SEEK_SET)
+        ftarget.write(bytes([PARTITION_TYPES[filesystem]]))
 
 
 def mount_fs(image: str, mount_dir: str, mount_method: str):
@@ -192,7 +249,7 @@ def unmount_fs(mount_dir: str, mount_method, mount_token):
         time.sleep(1)
 
 
-def build_disk(image, stage1, stage2, kernel, files, env):
+def build_disk(image, mbr, stage1, stage2, kernel, files, env):
     size_sectors = (env['imageSize'] + SECTOR_SIZE - 1) // SECTOR_SIZE
     file_system = env['imageFS']
     mount_method = env['mountMethod']
@@ -206,7 +263,15 @@ def build_disk(image, stage1, stage2, kernel, files, env):
 
     # create partition table
     print(f"> creating partition table...")
-    create_partition_table(image, partition_offset)
+    create_partition_table(image, partition_offset, file_system)
+
+    print(f"> installing MBR...")
+    install_mbr(image, mbr)
+
+    if mount_method == 'mtools' and file_system not in ['fat12', 'fat16', 'fat32']:
+        raise ValueError(f"mountMethod 'mtools' only supports FAT; use 'guestfs' or 'mount' for {file_system}")
+
+    entries = image_files(kernel, files, env)
 
     # create file system
     print(f"> formatting file using {file_system}...")
@@ -220,6 +285,11 @@ def build_disk(image, stage1, stage2, kernel, files, env):
     print(f"> installing stage2...")
     install_stage2(image, stage2, offset=1, limit=partition_offset)
 
+    if mount_method == 'mtools':
+        print(f"> copying files...")
+        copy_files_mtools(image, entries, offset=partition_offset)
+        return
+
     tempdir_name = 'tmp_mount_{0}'.format(int(time.time()))
     tempdir = os.path.join('/tmp', tempdir_name)
     mounted = False
@@ -232,26 +302,8 @@ def build_disk(image, stage1, stage2, kernel, files, env):
         mount_token = mount_fs(image, tempdir, mount_method)
         mounted = True
 
-        # copy kernel
-        print(f"> copying kernel...")
-        bootdir = os.path.join(tempdir, 'boot')
-        os.makedirs(bootdir)
-        copy2(kernel, bootdir)
-
-        # copy rest of files
-        src_root = env['BASEDIR']
         print(f"> copying files...")
-        for file in files:
-            file_src = file.srcnode().path
-            file_rel = os.path.relpath(file_src, src_root)
-            file_dst = os.path.join(tempdir, file_rel)
-
-            if os.path.isdir(file_src):
-                print('    ... creating directory', file_rel)
-                os.makedirs(file_dst)
-            else:
-                print('    ... copying', file_rel)
-                copy2(file_src, file_dst)
+        copy_files_to_dir(tempdir, entries)
 
     finally:
         print("> cleaning up...")
@@ -268,16 +320,17 @@ def build_disk(image, stage1, stage2, kernel, files, env):
 
 
 def build_image(target, source, env):
-    stage1 = str(source[0])
-    stage2 = str(source[1])
-    kernel = str(source[2])
-    files = source[3:]
+    mbr = str(source[0])
+    stage1 = str(source[1])
+    stage2 = str(source[2])
+    kernel = str(source[3])
+    files = source[4:]
 
     image = str(target[0])
     if env['imageType'] == 'floppy':
         build_floppy(image, stage1, stage2, kernel, files, env)
     elif env['imageType'] == 'disk':
-        build_disk(image, stage1, stage2, kernel, files, env)
+        build_disk(image, mbr, stage1, stage2, kernel, files, env)
     else:
         raise ValueError('Unknown image type ' + env['imageType'])
 
@@ -285,7 +338,7 @@ def build_image(target, source, env):
 # Setup image target
 root = env.Dir('root')
 root_content = GlobRecursive(env, '*', root)
-inputs = [stage1, stage2, kernel] + root_content
+inputs = [mbr, stage1, stage2, kernel] + root_content
 
 output_fmt = 'img'
 # if env['imageType'] == 'qcow3':
@@ -293,9 +346,15 @@ output_fmt = 'img'
 
 output = f'image.{output_fmt}'
 
+# varlist: also rebuild when the image options change, not just the input files
 image = env.Command(output, inputs,
-                    action=Action(build_image, 'Creating disk image...'), 
+                    action=Action(build_image, 'Creating disk image...',
+                                  varlist=['imageType', 'imageFS', 'imageSize', 'mountMethod']),
                     BASEDIR=root.srcnode().path)
 env.Depends(image, inputs)
+
+# build_image's own code is tracked, but not the code of the functions it calls, so rebuild the
+# image whenever this script changes
+env.Depends(image, env.File('SConscript').srcnode())
 
 Export('image')

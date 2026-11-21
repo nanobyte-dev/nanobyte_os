@@ -1,0 +1,29 @@
+# Fedora, RHEL and derivatives (dnf)
+# Used by scripts/install_deps.sh. One package per line, '#' starts a comment.
+
+# building the cross compiler (scripts/setup_toolchain.sh)
+gcc
+gcc-c++
+make
+bison
+flex
+gmp-devel
+libmpc-devel
+mpfr-devel
+texinfo
+wget
+
+# building the OS
+nasm
+python3-scons
+python3
+python3-sh
+python3-pyparted
+
+# building the disk image (image/SConscript)
+mtools
+dosfstools
+# optional, only for mountMethod = guestfs: guestfs-tools
+
+# running
+qemu-system-x86

@@ -1,0 +1,36 @@
+# openSUSE Leap (zypper)
+# Used by scripts/install_deps.sh. One package per line, '#' starts a comment,
+# 'pip:<name>' is installed with pip instead of the package manager.
+
+# building the cross compiler (scripts/setup_toolchain.sh)
+# (makeinfo instead of texinfo: on openSUSE, texinfo pulls in all of TeX Live)
+gcc
+gcc-c++
+make
+bison
+flex
+gmp-devel
+mpc-devel
+mpfr-devel
+makeinfo
+wget
+
+# building the OS
+nasm
+scons
+python3
+python3-sh
+# pyparted isn't packaged on Leap: build it with pip
+parted-devel
+python3-devel
+python3-pip
+pkgconf
+pip:pyparted
+
+# building the disk image (image/SConscript)
+mtools
+dosfstools
+# optional, only for mountMethod = guestfs: guestfs-tools
+
+# running
+qemu-x86

@@ -4,6 +4,9 @@ from SCons.Environment import *
 from SCons.Node import *
 from build_scripts.phony_targets import PhonyTargets
 from build_scripts.utility import ParseSize, RemoveSuffix
+from build_scripts.nasm_scanner import RegisterNasmScanner
+
+RegisterNasmScanner()
 
 VARS = Variables('build_scripts/config.py', ARGUMENTS)
 VARS.AddVariables(
@@ -15,7 +18,7 @@ VARS.AddVariables(
     EnumVariable("arch", 
                  help="Target architecture", 
                  default="i686",
-                 allowed_values=("i686")),
+                 allowed_values=("i686",)),
 
     EnumVariable("imageType",
                  help="Type of image",
@@ -28,9 +31,9 @@ VARS.AddVariables(
                  allowed_values=("fat12", "fat16", "fat32", "ext2")),
 
     EnumVariable("mountMethod",
-                 help="Method to use for mounting image",
-                 default="guestfs",
-                 allowed_values=("guestfs", "mount"))
+                 help="How files are copied into the disk image",
+                 default="mtools",
+                 allowed_values=("mtools", "guestfs", "mount"))
     )
 VARS.Add("imageSize", 
          help="The size of the image, will be rounded up to the nearest multiple of 512. " +
@@ -43,8 +46,8 @@ VARS.Add("toolchain",
          default="toolchain")
 
 DEPS = {
-    'binutils': '2.37',
-    'gcc': '11.2.0'
+    'binutils': '2.47',
+    'gcc': '16.2.0'
 }
 
 
@@ -146,6 +149,7 @@ variantDirStage1 = variantDir + '/stage1_{0}'.format(TARGET_ENVIRONMENT['imageFS
 
 SConscript('src/libs/core/SConscript', variant_dir=variantDir + '/libs/core', duplicate=0)
 
+SConscript('src/bootloader/mbr/SConscript', variant_dir=variantDir + '/mbr', duplicate=0)
 SConscript('src/bootloader/stage1/SConscript', variant_dir=variantDirStage1, duplicate=0)
 SConscript('src/bootloader/stage2/SConscript', variant_dir=variantDir + '/stage2', duplicate=0)
 SConscript('src/kernel/SConscript', variant_dir=variantDir + '/kernel', duplicate=0)

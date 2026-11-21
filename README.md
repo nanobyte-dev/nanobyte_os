@@ -27,23 +27,13 @@ A major change in Part 11 was the move from `make` to `scons`. Most of the build
 
 ## Building
 
-1. Install dependencies:
+1. Install dependencies by running `scripts/install_deps.sh`. It detects your distro (Debian/Ubuntu, Fedora, Arch, openSUSE) and installs the packages listed in `scripts/deps/<distro>.txt`. To install them yourself instead, use that list with your package manager, for example:
 
 ```sh
-# Ubuntu, Debian:
-sudo apt install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo wget \
-                   nasm mtools python3 python3-pip python3-parted scons dosfstools libguestfs-tools qemu-system-x86
-
-# Fedora:
-sudo dnf install gcc gcc-c++ make bison flex gmp-devel libmpc-devel mpfr-devel texinfo wget \
-                   nasm mtools python3 python3-pip python3-pyparted python3-scons dosfstools guestfs-tools qemu-system-x86
-
-# Arch & Arch-based:
-paru -S gcc make bison flex libgmp-static libmpc mpfr texinfo nasm mtools qemu-system-x86 python3 scons
+sudo apt install $(sed 's/#.*//' scripts/deps/debian.txt)
 ```
-NOTE: to install all the required packages on Arch, you need an [AUR helper](https://wiki.archlinux.org/title/AUR_helpers).
 
-2. Install python packages: `python3 -m pip install -r requirements.txt`
+2. The Python packages (`sh`, `pyparted`) are in the lists above. If you use a virtual environment or a distro without them, install them with `python3 -m pip install -r requirements.txt`.
 
 3. Check the `build_scripts/config.py` configuration file. The `toolchain` variable specifies where the toolchain will be downloaded and installed. The default path is `../.toolchains`, which is in the parent directory to where you cloned the repo.
 
@@ -57,11 +47,13 @@ Another important variable is `mountMethod`. See the section below for details.
 
 ### Mount methods
 
-There are 2 supported mount methods that can be configured in `build_scripts/config.py` with the `mountMethod` variable:
+The `mountMethod` variable in `build_scripts/config.py` sets how files are copied into the disk image:
 
-* `guestfs` uses the `guestmount` command, and it doesn't require sudo access. This is the preferred method, however in some distributions (most notably WSL) it isn't working properly.
+* `mtools` (default) writes the file system directly with `mtools`, without mounting anything. No sudo, works in WSL and containers. FAT only.
 
-* `mount` is provided as a backup when `guestfs` fails. The disadvantage is that it requires typing your password every time you rebuild the disk image.
+* `guestfs` mounts the image with `guestmount` (libguestfs), without sudo. Use it if your distro has no `mtools`; install libguestfs yourself (`libguestfs-tools` on Debian/Ubuntu, `guestfs-tools` on Fedora and openSUSE, `libguestfs` on Arch). It doesn't work properly on some systems, most notably WSL.
+
+* `mount` uses `losetup` and `mount`. The disadvantage is that it requires typing your password every time you rebuild the disk image.
 
 ### Warning
 

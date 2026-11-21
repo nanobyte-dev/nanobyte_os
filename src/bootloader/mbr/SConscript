@@ -1,0 +1,22 @@
+from SCons.Environment import Environment
+
+from build_scripts.utility import GlobRecursive
+
+Import('TARGET_ENVIRONMENT')
+TARGET_ENVIRONMENT: Environment
+
+env = TARGET_ENVIRONMENT.Clone()
+env.Append(
+    LINKFLAGS = [
+        '-Wl,-T', env.File('linker.ld').srcnode().path,
+        '-Wl,-Map=' + env.File('mbr.map').path
+    ],
+)
+
+inputs = GlobRecursive(env, "*.asm")
+
+objects = env.Object(inputs)
+
+mbr = env.Program('mbr.bin', objects)
+
+Export('mbr')
