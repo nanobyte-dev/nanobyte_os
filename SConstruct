@@ -15,7 +15,7 @@ VARS.AddVariables(
     EnumVariable("arch", 
                  help="Target architecture", 
                  default="i686",
-                 allowed_values=("i686")),
+                 allowed_values=("i686",)),
 
     EnumVariable("imageType",
                  help="Type of image",
