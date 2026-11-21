@@ -47,11 +47,13 @@ Another important variable is `mountMethod`. See the section below for details.
 
 ### Mount methods
 
-There are 2 supported mount methods that can be configured in `build_scripts/config.py` with the `mountMethod` variable:
+The `mountMethod` variable in `build_scripts/config.py` sets how files are copied into the disk image:
 
-* `guestfs` uses the `guestmount` command, and it doesn't require sudo access. This is the preferred method, however in some distributions (most notably WSL) it isn't working properly.
+* `mtools` (default) writes the file system directly with `mtools`, without mounting anything. No sudo, works in WSL and containers. FAT only.
 
-* `mount` is provided as a backup when `guestfs` fails. The disadvantage is that it requires typing your password every time you rebuild the disk image.
+* `guestfs` mounts the image with `guestmount` (libguestfs), without sudo. Use it if your distro has no `mtools`; install libguestfs yourself (`libguestfs-tools` on Debian/Ubuntu, `guestfs-tools` on Fedora and openSUSE, `libguestfs` on Arch). It doesn't work properly on some systems, most notably WSL.
+
+* `mount` uses `losetup` and `mount`. The disadvantage is that it requires typing your password every time you rebuild the disk image.
 
 ### Warning
 

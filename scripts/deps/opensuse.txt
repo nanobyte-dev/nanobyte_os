@@ -24,7 +24,7 @@ python3-parted
 # building the disk image (image/SConscript)
 mtools
 dosfstools
-guestfs-tools
+# optional, only for mountMethod = guestfs: guestfs-tools
 
 # running
 qemu-x86

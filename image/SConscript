@@ -115,6 +115,46 @@ def install_stage2(target: str, stage2: str, offset=0, limit=None):
             ftarget.seek(offset * SECTOR_SIZE, SEEK_SET)
             ftarget.write(fstage2.read())
 
+def image_files(kernel, files, env):
+    """
+    What goes into the file system: the kernel in /boot, and everything under image/root.
+    Returns (path in the image, source path or None for a directory) pairs, parents first.
+    """
+    entries = [('boot', None), ('boot/' + os.path.basename(kernel), kernel)]
+    src_root = env['BASEDIR']
+    for file in files:
+        file_src = file.srcnode().path
+        file_rel = os.path.relpath(file_src, src_root)
+        entries.append((file_rel, None if os.path.isdir(file_src) else file_src))
+    return entries
+
+
+def copy_files_mtools(image: str, entries, offset=0):
+    """Copies files into a FAT partition with mtools, without mounting it."""
+    # mtools addresses a partition inside a disk image as image@@<byte offset>
+    target = image if offset == 0 else f'{image}@@{offset * SECTOR_SIZE}'
+    # skip mtools' sanity check on the disk geometry, which an image file doesn't have
+    mtools_env = dict(os.environ, MTOOLS_SKIP_CHECK='1')
+    for path, src in entries:
+        if src is None:
+            print('    ... creating directory', path)
+            sh.mmd('-i', target, '::' + path, _env=mtools_env)
+        else:
+            print('    ... copying', path)
+            sh.mcopy('-i', target, src, '::' + path, _env=mtools_env)
+
+
+def copy_files_to_dir(root: str, entries):
+    for path, src in entries:
+        dst = os.path.join(root, path)
+        if src is None:
+            print('    ... creating directory', path)
+            os.makedirs(dst, exist_ok=True)
+        else:
+            print('    ... copying', path)
+            copy2(src, dst)
+
+
 def build_floppy(image, stage1, stage2, kernel, files, env):
     size_sectors = 2880
     stage2_size = os.stat(stage2).st_size
@@ -132,23 +172,7 @@ def build_floppy(image, stage1, stage2, kernel, files, env):
     install_stage2(image, stage2, offset=1)
 
     print(f"> copying files...")
-    print('    ... copying', kernel)
-    sh.mmd('-i', image, "::boot")
-    sh.mcopy('-i', image, kernel, "::boot/")
-
-    # copy rest of files
-    src_root = env['BASEDIR']
-    for file in files:
-        file_src = file.srcnode().path
-        file_rel = os.path.relpath(file_src, src_root)
-        file_dst = '::' + file_rel
-
-        if os.path.isdir(file_src):
-            print('    ... creating directory', file_rel)
-            sh.mmd('-i', image, file_dst)
-        else:
-            print('    ... copying', file_rel)
-            sh.mcopy('-i', image, file_src, file_dst)
+    copy_files_mtools(image, image_files(kernel, files, env))
 
 
 def create_partition_table(target: str, align_start: int):
@@ -208,6 +232,11 @@ def build_disk(image, stage1, stage2, kernel, files, env):
     print(f"> creating partition table...")
     create_partition_table(image, partition_offset)
 
+    if mount_method == 'mtools' and file_system not in ['fat12', 'fat16', 'fat32']:
+        raise ValueError(f"mountMethod 'mtools' only supports FAT; use 'guestfs' or 'mount' for {file_system}")
+
+    entries = image_files(kernel, files, env)
+
     # create file system
     print(f"> formatting file using {file_system}...")
     create_filesystem(image, file_system, offset=partition_offset)
@@ -219,6 +248,11 @@ def build_disk(image, stage1, stage2, kernel, files, env):
     # install stage2
     print(f"> installing stage2...")
     install_stage2(image, stage2, offset=1, limit=partition_offset)
+
+    if mount_method == 'mtools':
+        print(f"> copying files...")
+        copy_files_mtools(image, entries, offset=partition_offset)
+        return
 
     tempdir_name = 'tmp_mount_{0}'.format(int(time.time()))
     tempdir = os.path.join('/tmp', tempdir_name)
@@ -232,26 +266,8 @@ def build_disk(image, stage1, stage2, kernel, files, env):
         mount_token = mount_fs(image, tempdir, mount_method)
         mounted = True
 
-        # copy kernel
-        print(f"> copying kernel...")
-        bootdir = os.path.join(tempdir, 'boot')
-        os.makedirs(bootdir)
-        copy2(kernel, bootdir)
-
-        # copy rest of files
-        src_root = env['BASEDIR']
         print(f"> copying files...")
-        for file in files:
-            file_src = file.srcnode().path
-            file_rel = os.path.relpath(file_src, src_root)
-            file_dst = os.path.join(tempdir, file_rel)
-
-            if os.path.isdir(file_src):
-                print('    ... creating directory', file_rel)
-                os.makedirs(file_dst)
-            else:
-                print('    ... copying', file_rel)
-                copy2(file_src, file_dst)
+        copy_files_to_dir(tempdir, entries)
 
     finally:
         print("> cleaning up...")
