@@ -2,13 +2,6 @@
 This repository contains the code from the ["Building an OS"](https://www.youtube.com/watch?v=9t-SPC7Tczc&list=PLFjM7v6KGMpiH2G-kT781ByCNC_0pKpPN) series on the ["Nanobyte"](https://www.youtube.com/channel/UCSPIuWADJIMIf9Erf--XAsA) YouTube channel.
 
 
-This branch contains the code as written in [Part 11 - Memory detection](https://www.youtube.com/watch?v=xp-yB9WBadI), with some minor bug fixes:
-
-* fixed bochs configuration
-* fixed `missing ../.toolchains directory` error when building toolchain
-* fixed error related to PREFIX when building toolchain
-* added support for "mount" method (in addition to libguestfs)
-
 ## Prerequisites
 
 The project requires a Unix-like environment. If you are using Windows, there are various ways of setting one up (WSL, a Linux virtual machine, Cygwin, MSYS2). I recommend using WSL, which is the [easiest to setup](https://learn.microsoft.com/en-us/windows/wsl/install).
