@@ -46,8 +46,8 @@ VARS.Add("toolchain",
          default="toolchain")
 
 DEPS = {
-    'binutils': '2.37',
-    'gcc': '11.2.0'
+    'binutils': '2.47',
+    'gcc': '16.2.0'
 }
 
 
