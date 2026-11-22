@@ -8,6 +8,10 @@ This branch contains the code as written in [Part 11 - Memory detection](https:/
 * fixed `missing ../.toolchains directory` error when building toolchain
 * fixed error related to PREFIX when building toolchain
 * added support for "mount" method (in addition to libguestfs)
+* FAT: fixed operator precedence in the directory check
+* PIC: fixed reading the IRR and ISR registers
+* updated the toolchain to binutils 2.47 and GCC 16.2.0, the old versions don't build with newer compilers
+* added `.gitattributes`, so the files keep LF line endings on Windows (CRLF breaks the bash scripts)
 
 ## Prerequisites
 
