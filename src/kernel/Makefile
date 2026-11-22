@@ -51,7 +51,7 @@ $(BUILD_DIR)/kernel/asm/%.obj: %.asm $(HEADERS_ASM)
 	@echo "--> Compiled: " $<
 
 arch/i686/isrs_gen.c arch/i686/isrs_gen.inc:
-	@$(SOURCE_DIR)/build_tools/generate_isrs.sh $@
+	@$(SOURCE_DIR)/build_scripts/generate_isrs.sh arch/i686/isrs_gen.c arch/i686/isrs_gen.inc
 
 clean:
 	rm -f $(BUILD_DIR)/kernel.bin
