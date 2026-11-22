@@ -1,0 +1,3 @@
+# Check out text files with LF line endings, also on Windows. With CRLF, the bash scripts fail
+# with "$'\r': command not found".
+* text=auto eol=lf
