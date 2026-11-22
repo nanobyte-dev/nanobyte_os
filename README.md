@@ -38,6 +38,14 @@ Another important variable is `mountMethod`. See the section below for details.
 
 5. Run `scons`. If you are using the `mount` method, type your sudo password when prompted, this is required for running `losetup`, `mount`, `umount`.
 
+### Building with docker
+
+If you'd rather not install everything on your machine, `./build-docker.sh` runs the build in a container, so you only need `docker` or `podman`. Any arguments are passed to `scons`, for example `./build-docker.sh imageType=floppy`.
+
+The first run builds a local `nanobyte-build` image with the dependencies and the cross compiler, which takes a while. Later runs reuse it. When the files it's built from change (`scripts/docker/Dockerfile`, `scripts/install_deps.sh`, `scripts/deps/debian.txt`, `scripts/setup_toolchain.sh`), the script builds a new image and lists the old ones, which you can delete.
+
+The container always uses the `mtools` mount method. To run the OS, use `scripts/run.sh` on your machine (it needs `qemu-system-x86`), for example `scripts/run.sh disk build/i686_debug/image.img`. `scons run` would rebuild everything with your local toolchain.
+
 ### Mount methods
 
 The `mountMethod` variable in `build_scripts/config.py` sets how files are copied into the disk image:
