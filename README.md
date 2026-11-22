@@ -62,6 +62,8 @@ The `mountMethod` variable in `build_scripts/config.py` sets how files are copie
 
 * run `scons run` to test your OS using qemu.
 
+* to make a bootable ISO, build a floppy image (`scons imageType=floppy`), then run `scripts/img_to_iso.sh build/i686_debug/image.img nbos.iso`. It needs `xorriso`. The ISO boots in floppy emulation mode: `qemu-system-i386 -cdrom nbos.iso`.
+
 ## Debugging with qemu and GDB
 
 * run `scons debug`.
