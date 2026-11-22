@@ -46,7 +46,7 @@ do
     case "$1" in
         -c) OPERATION='clean'
             ;;
-        *)  TOOLCHAINS_DIR=$(realpath "$1")
+        *)  TOOLCHAINS_DIR="$1"
             ;;
     esac
     shift
@@ -58,6 +58,7 @@ if [ -z "$TOOLCHAINS_DIR" ]; then
 fi
 
 mkdir -p "$TOOLCHAINS_DIR"
+TOOLCHAINS_DIR=$(realpath "$TOOLCHAINS_DIR")     # after mkdir: on macOS, realpath fails if it doesn't exist
 pushd "$TOOLCHAINS_DIR"
 TOOLCHAIN_PREFIX="$TOOLCHAINS_DIR/$TARGET"
 
