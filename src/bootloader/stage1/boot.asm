@@ -372,6 +372,7 @@ KERNEL_LOAD_SEGMENT     equ 0x2000
 KERNEL_LOAD_OFFSET      equ 0
 
 
+; If NASM says "TIMES value -N is negative", the code above is N bytes too big to fit in 510 bytes
 times 510-($-$$) db 0
 dw 0AA55h
 
