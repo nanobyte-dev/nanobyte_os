@@ -349,7 +349,7 @@ FAT_File* FAT_Open(DISK* disk, const char* path)
             FAT_Close(current);
 
             // check if directory
-            if (!isLast && entry.Attributes & FAT_ATTRIBUTE_DIRECTORY == 0)
+            if (!isLast && (entry.Attributes & FAT_ATTRIBUTE_DIRECTORY) == 0)
             {
                 printf("FAT: %s not a directory\r\n", name);
                 return NULL;
