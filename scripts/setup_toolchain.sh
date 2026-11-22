@@ -12,6 +12,19 @@ TARGET=i686-elf
 
 set -e
 
+# number of CPU cores, for make -j (nproc doesn't exist on macOS, getconf works on both)
+JOBS=$(getconf _NPROCESSORS_ONLN)
+
+# On macOS, Homebrew installs GMP, MPFR and MPC where GCC doesn't look for them
+GCC_EXTRA_ARGS=()
+if [ "$(uname)" = "Darwin" ] && command -v brew >/dev/null; then
+    GCC_EXTRA_ARGS+=(
+        --with-gmp="$(brew --prefix gmp)"
+        --with-mpfr="$(brew --prefix mpfr)"
+        --with-mpc="$(brew --prefix libmpc)"
+    )
+fi
+
 # Downloads a file, unless it's already there (e.g. after a build that failed halfway).
 # Downloads to a .part file first, so an interrupted download isn't mistaken for a complete one.
 download() {
@@ -65,7 +78,7 @@ if [ "$OPERATION" = "build" ]; then
         --with-sysroot					\
         --disable-nls					\
         --disable-werror
-    make -j"$(nproc)"
+    make -j"$JOBS"
     make install
     popd
 
@@ -82,8 +95,9 @@ if [ "$OPERATION" = "build" ]; then
         --target=${TARGET}				\
         --disable-nls					\
         --enable-languages=c,c++		\
-        --without-headers
-    make -j"$(nproc)" all-gcc all-target-libgcc
+        --without-headers				\
+        "${GCC_EXTRA_ARGS[@]}"
+    make -j"$JOBS" all-gcc all-target-libgcc
     make install-gcc install-target-libgcc
     popd
 
