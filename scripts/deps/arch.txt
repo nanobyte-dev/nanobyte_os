@@ -16,8 +16,6 @@ wget
 nasm
 scons
 python
-python-sh
-python-pyparted
 
 # building the disk image (image/SConscript)
 mtools

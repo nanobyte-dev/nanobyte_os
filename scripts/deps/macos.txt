@@ -1,0 +1,22 @@
+# macOS (Homebrew)
+# Used by scripts/install_deps.sh. One package per line, '#' starts a comment.
+# The C compiler used to build the cross compiler comes with the Xcode command line tools
+# (xcode-select --install).
+
+# building the cross compiler (scripts/setup_toolchain.sh)
+gmp
+mpfr
+libmpc
+texinfo
+wget
+
+# building the OS
+nasm
+scons
+
+# building the disk image (image/SConscript)
+mtools
+dosfstools
+
+# running
+qemu

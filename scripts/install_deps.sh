@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Installs the packages needed to build and run nanobyte_os.
-# The package lists are in scripts/deps/<distro>.txt.
+# The package lists are in scripts/deps/<distro>.txt (macos.txt for macOS).
 #
 # Usage: install_deps.sh [-y]
 #   -y   don't ask for confirmation (for scripts and containers)
@@ -14,9 +14,18 @@ if [ "$1" = "-y" ]; then
     ASSUME_YES=1
 fi
 
-# Detect distro
+# Detect the distro, or macOS
 PACKAGE_UPDATE=
-if [ -x "$(command -v apk)" ]; then
+NEEDS_ROOT=1
+if [ "$(uname)" = "Darwin" ]; then
+    if [ ! -x "$(command -v brew)" ]; then
+        echo "On macOS, install Homebrew first: https://brew.sh"
+        exit 1
+    fi
+    DISTRO='macos'
+    PACKAGE_INSTALL='brew install'
+    NEEDS_ROOT=             # Homebrew refuses to run as root
+elif [ -x "$(command -v apk)" ]; then
     echo "Alpine not supported."
     exit 1
 elif [ -x "$(command -v apt-get)" ]; then
@@ -31,9 +40,6 @@ elif [ -x "$(command -v yum)" ]; then
     PACKAGE_INSTALL="yum install ${ASSUME_YES:+-y}"
 elif [ -x "$(command -v zypper)" ]; then
     DISTRO='opensuse'
-    if grep -q '^ID="\?opensuse-leap' /etc/os-release 2>/dev/null; then
-        DISTRO='opensuse-leap'
-    fi
     PACKAGE_INSTALL="zypper ${ASSUME_YES:+--non-interactive} install"
 elif [ -x "$(command -v pacman)" ]; then
     DISTRO='arch'
@@ -44,21 +50,12 @@ else
     exit 1
 fi
 
-# Read the package list, without comments and empty lines.
-# 'pip:<name>' lines are for Python packages the distro doesn't have.
-LIST=($(sed -e 's/#.*//' "$DEPS_DIR/$DISTRO.txt"))
-DEPS=()
-PIP_DEPS=()
-for item in "${LIST[@]}"; do
-    case "$item" in
-        pip:*) PIP_DEPS+=("${item#pip:}") ;;
-        *)     DEPS+=("$item") ;;
-    esac
-done
+# Read the package list, without comments and empty lines
+DEPS=($(sed -e 's/#.*//' "$DEPS_DIR/$DISTRO.txt"))
 
 # Package managers need root
 SUDO=
-if [ "$(id -u)" -ne 0 ]; then
+if [ -n "$NEEDS_ROOT" ] && [ "$(id -u)" -ne 0 ]; then
     SUDO='sudo'
 fi
 
@@ -66,9 +63,6 @@ echo ""
 echo "Will install dependencies by running the following command."
 echo ""
 echo " \$ $SUDO $PACKAGE_INSTALL ${DEPS[*]}"
-if [ ${#PIP_DEPS[@]} -gt 0 ]; then
-    echo " \$ python3 -m pip install --user ${PIP_DEPS[*]}"
-fi
 echo ""
 
 if [ -z "$ASSUME_YES" ]; then
@@ -85,7 +79,3 @@ if [ -n "$PACKAGE_UPDATE" ]; then
     $SUDO $PACKAGE_UPDATE
 fi
 $SUDO $PACKAGE_INSTALL "${DEPS[@]}"
-
-if [ ${#PIP_DEPS[@]} -gt 0 ]; then
-    python3 -m pip install --user "${PIP_DEPS[@]}"
-fi

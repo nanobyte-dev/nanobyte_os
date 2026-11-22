@@ -20,23 +20,21 @@ A major change in Part 11 was the move from `make` to `scons`. Most of the build
 
 ## Building
 
-1. Install dependencies by running `scripts/install_deps.sh`. It detects your distro (Debian/Ubuntu, Fedora, Arch, openSUSE) and installs the packages listed in `scripts/deps/<distro>.txt`. To install them yourself instead, use that list with your package manager, for example:
+1. Install dependencies by running `scripts/install_deps.sh`. It detects your distro (Debian/Ubuntu, Fedora, Arch, openSUSE), or macOS, and installs the packages listed in `scripts/deps/<distro>.txt`. On macOS, it needs [Homebrew](https://brew.sh) and the Xcode command line tools (`xcode-select --install`). To install them yourself instead, use that list with your package manager, for example:
 
 ```sh
 sudo apt install $(sed 's/#.*//' scripts/deps/debian.txt)
 ```
 
-2. The Python packages (`sh`, `pyparted`) are in the lists above. If you use a virtual environment or a distro without them, install them with `python3 -m pip install -r requirements.txt`.
-
-3. Check the `build_scripts/config.py` configuration file. The `toolchain` variable specifies where the toolchain will be downloaded and installed. The default path is `../.toolchains`, which is in the parent directory to where you cloned the repo.
+2. Check the `build_scripts/config.py` configuration file. The `toolchain` variable specifies where the toolchain will be downloaded and installed. The default path is `../.toolchains`, which is in the parent directory to where you cloned the repo.
 
 Coming from Part 10, you might want to reuse the old toolchain you have already built. Simply change the path `toolchain` variable to point to the correct directory.
 
 Another important variable is `mountMethod`. See the section below for details.
 
-4. Run `scons toolchain`, this should download and build the required tools (binutils and GCC). If you encounter errors during this step, you might have to modify `scripts/setup_toolchain.sh` and try a different version of **binutils** and **gcc**. Using the same version as the one bundled with your distribution is your best bet.
+3. Run `scons toolchain`, this should download and build the required tools (binutils and GCC). If you encounter errors during this step, you might have to modify `scripts/setup_toolchain.sh` and try a different version of **binutils** and **gcc**. Using the same version as the one bundled with your distribution is your best bet.
 
-5. Run `scons`. If you are using the `mount` method, type your sudo password when prompted, this is required for running `losetup`, `mount`, `umount`.
+4. Run `scons`. If you are using the `mount` method, type your sudo password when prompted, this is required for running `losetup`, `mount`, `umount`.
 
 ### Building with docker
 
@@ -50,7 +48,7 @@ The container always uses the `mtools` mount method. To run the OS, use `scripts
 
 The `mountMethod` variable in `build_scripts/config.py` sets how files are copied into the disk image:
 
-* `mtools` (default) writes the file system directly with `mtools`, without mounting anything. No sudo, works in WSL and containers. FAT only.
+* `mtools` (default) writes the file system directly with `mtools`, without mounting anything. No sudo, works in WSL, containers and on macOS. FAT only.
 
 * `guestfs` mounts the image with `guestmount` (libguestfs), without sudo. Use it if your distro has no `mtools`; install libguestfs yourself (`libguestfs-tools` on Debian/Ubuntu, `guestfs-tools` on Fedora and openSUSE, `libguestfs` on Arch). It doesn't work properly on some systems, most notably WSL.
 
