@@ -20,7 +20,7 @@ A major change in Part 11 was the move from `make` to `scons`. Most of the build
 
 ## Building
 
-1. Install dependencies by running `scripts/install_deps.sh`. It detects your distro (Debian/Ubuntu, Fedora, Arch, openSUSE) and installs the packages listed in `scripts/deps/<distro>.txt`. To install them yourself instead, use that list with your package manager, for example:
+1. Install dependencies by running `scripts/install_deps.sh`. It detects your distro (Debian/Ubuntu, Fedora, Arch, openSUSE), or macOS, and installs the packages listed in `scripts/deps/<distro>.txt`. On macOS, it needs [Homebrew](https://brew.sh) and the Xcode command line tools (`xcode-select --install`). To install them yourself instead, use that list with your package manager, for example:
 
 ```sh
 sudo apt install $(sed 's/#.*//' scripts/deps/debian.txt)
@@ -48,7 +48,7 @@ The container always uses the `mtools` mount method. To run the OS, use `scripts
 
 The `mountMethod` variable in `build_scripts/config.py` sets how files are copied into the disk image:
 
-* `mtools` (default) writes the file system directly with `mtools`, without mounting anything. No sudo, works in WSL and containers. FAT only.
+* `mtools` (default) writes the file system directly with `mtools`, without mounting anything. No sudo, works in WSL, containers and on macOS. FAT only.
 
 * `guestfs` mounts the image with `guestmount` (libguestfs), without sudo. Use it if your distro has no `mtools`; install libguestfs yourself (`libguestfs-tools` on Debian/Ubuntu, `guestfs-tools` on Fedora and openSUSE, `libguestfs` on Arch). It doesn't work properly on some systems, most notably WSL.
 
