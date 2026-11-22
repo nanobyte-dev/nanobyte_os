@@ -17,7 +17,6 @@ wget
 nasm
 python3-scons
 python3
-python3-sh
 
 # building the disk image (image/SConscript)
 mtools
