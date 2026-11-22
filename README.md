@@ -6,6 +6,8 @@ This branch contains the code as written in [Part 1](https://youtu.be/9t-SPC7Tcz
 * main.asm: added missing colon on line 57
 * Makefile: convert spaces to tabs to fix "missing separator" error
 * Makefile: create build directory automatically to fix "unable to open output file" error
+* explained the "TIMES value is negative" error, which means the boot sector code is too big
+* added `.gitattributes`, so the files keep LF line endings on Windows (CRLF breaks the bash scripts)
 
 ## Prerequisites
 
