@@ -11,7 +11,7 @@ toolchain_binutils: $(TOOLCHAIN_PREFIX)/bin/i686-elf-ld
 
 $(TOOLCHAIN_PREFIX)/bin/i686-elf-ld: $(BINUTILS_SRC).tar.xz
 	cd toolchain && tar -xf binutils-$(BINUTILS_VERSION).tar.xz
-	mkdir $(BINUTILS_BUILD)
+	mkdir -p $(BINUTILS_BUILD)
 	cd $(BINUTILS_BUILD) && CFLAGS= ASMFLAGS= CC= CXX= LD= ASM= LINKFLAGS= LIBS= ../binutils-$(BINUTILS_VERSION)/configure \
 		--prefix="$(TOOLCHAIN_PREFIX)"	\
 		--target=$(TARGET)				\
@@ -33,7 +33,7 @@ toolchain_gcc: $(TOOLCHAIN_PREFIX)/bin/i686-elf-gcc
 
 $(TOOLCHAIN_PREFIX)/bin/i686-elf-gcc: $(TOOLCHAIN_PREFIX)/bin/i686-elf-ld $(GCC_SRC).tar.xz
 	cd toolchain && tar -xf gcc-$(GCC_VERSION).tar.xz
-	mkdir $(GCC_BUILD)
+	mkdir -p $(GCC_BUILD)
 	cd $(GCC_BUILD) && CFLAGS= ASMFLAGS= CC= CXX= LD= ASM= LINKFLAGS= LIBS= ../gcc-$(GCC_VERSION)/configure \
 		--prefix="$(TOOLCHAIN_PREFIX)" 	\
 		--target=$(TARGET)				\
