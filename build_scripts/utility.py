@@ -4,6 +4,7 @@ import os
 
 from SCons.Node.FS import Dir, File, Entry
 from SCons.Environment import Environment
+from SCons.Errors import UserError
 
 
 def ParseSize(size: str):
@@ -46,6 +47,15 @@ def FindIndex(the_list, predicate):
         if predicate(the_list[i]):
             return i
     return None
+
+
+def PopFile(objects, name, directory):
+    index = FindIndex(objects, lambda item: IsFileName(item, name))
+    if index is None:
+        source = name.replace('.o', '.asm')
+        raise UserError(f"{name} is missing from the objects to link. It's built from {source}, "
+                        f"check that {directory}/{source} exists.")
+    return objects.pop(index)
 
 
 def IsFileName(obj, name):

@@ -1,7 +1,7 @@
 import os
 
 from SCons.Environment import Environment
-from build_scripts.utility import GlobRecursive, FindIndex, IsFileName
+from build_scripts.utility import GlobRecursive, PopFile
 
 Import('TARGET_ENVIRONMENT')
 TARGET_ENVIRONMENT: Environment
@@ -27,8 +27,8 @@ sources = GlobRecursive(env, '*.c') + \
 
 objects = env.Object(sources)
 
-obj_crti = objects.pop(FindIndex(objects, lambda item: IsFileName(item, 'crti.o')))
-obj_crtn = objects.pop(FindIndex(objects, lambda item: IsFileName(item, 'crtn.o')))
+obj_crti = PopFile(objects, 'crti.o', env.Dir('.').srcnode().path)
+obj_crtn = PopFile(objects, 'crtn.o', env.Dir('.').srcnode().path)
 
 Import('libcore')
 
