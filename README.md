@@ -4,6 +4,9 @@ This repo contains the code from the ["Building an OS"](https://www.youtube.com/
 This branch contains the code as written in [Part 4 - Writing bootloader in C](https://youtu.be/F3XiH78erNM), with some minor bug fixes:
 
 * fixed bochs configuration
+* explained the "TIMES value is negative" error, which means the boot sector code is too big
+* added `mtools` and `dosfstools` to the prerequisites
+* added `.gitattributes`, so the files keep LF line endings on Windows (CRLF breaks the bash scripts)
 
 ## Prerequisites
 
