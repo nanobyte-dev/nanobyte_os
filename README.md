@@ -26,7 +26,7 @@ A major change in Part 11 was the move from `make` to `scons`. Most of the build
 sudo apt install $(sed 's/#.*//' scripts/deps/debian.txt)
 ```
 
-2. The Python packages (`sh`, `pyparted`) are in the lists above. If you use a virtual environment or a distro without them, install them with `python3 -m pip install -r requirements.txt`.
+2. The Python package `sh` is in the lists above. If you use a virtual environment or a distro without them, install them with `python3 -m pip install -r requirements.txt`.
 
 3. Check the `build_scripts/config.py` configuration file. The `toolchain` variable specifies where the toolchain will be downloaded and installed. The default path is `../.toolchains`, which is in the parent directory to where you cloned the repo.
 

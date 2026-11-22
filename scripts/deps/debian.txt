@@ -16,7 +16,6 @@ nasm
 scons
 python3
 python3-sh
-python3-parted
 
 # building the disk image (image/SConscript)
 mtools

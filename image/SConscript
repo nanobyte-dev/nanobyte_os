@@ -1,12 +1,12 @@
 import os
 import re
+import struct
 import time
 from decimal import Decimal
 from io import SEEK_CUR, SEEK_SET
 from pathlib import Path
 from shutil import copy2
 from getpass import getpass
-import parted
 import sh
 
 from SCons.Action import Action
@@ -80,7 +80,6 @@ def find_symbol_in_map_file(map_file: str, symbol: str):
 def install_mbr(target: str, mbr: str):
     """
     Writes the MBR boot code into the first sector, in front of the partition table.
-    Older versions of libparted wrote a generic MBR there for us, libparted 3.8 doesn't anymore.
     """
     with open(mbr, 'rb') as fmbr:
         code = fmbr.read()
@@ -202,21 +201,60 @@ PARTITION_TYPES = {
     'ext2':  0x83,      # Linux
 }
 
-def create_partition_table(target: str, align_start: int, filesystem: str):
-    device = parted.getDevice(target)
-    disk = parted.freshDisk(device, 'msdos')
-    freeSpace = disk.getFreeSpaceRegions()
-    partitionGeometry = parted.Geometry(device, align_start, end=freeSpace[-1].end)
-    partition = parted.Partition(disk=disk, type=parted.PARTITION_NORMAL, geometry=partitionGeometry)
-    partition.setFlag(parted.PARTITION_BOOT)
-    disk.addPartition(partition, constraint=device.optimalAlignedConstraint)
-    disk.commit()
+def lba_to_chs(lba: int, total_sectors: int):
+    """
+    Converts a sector number to the 3 byte CHS address used in partition entries.
 
-    # parted marks the partition as Linux (0x83) unless told otherwise, and has no type for FAT12,
-    # so write the type byte (offset 4 in the first partition entry) ourselves
+    The geometry is the one most BIOSes come up with for LBA disks ("LBA-assist" translation):
+    63 sectors per track, and the fewest heads (16, 32, 64, 128 or 255) that keep the disk
+    within 1024 cylinders.
+
+    A disk image has no geometry of its own, so BIOSes also look at the partition table: the
+    partition's end address gives the number of heads and sectors per track. For that to work,
+    addresses after the last whole cylinder (or past cylinder 1023) are replaced with the last
+    sector of the last whole cylinder. Those sectors can only be reached with LBA.
+    """
+    sectors = 63
+    heads = 16
+    while heads < 255 and total_sectors > 1024 * heads * sectors:
+        heads = min(heads * 2, 255)
+
+    last_cylinder = min(1023, total_sectors // (heads * sectors) - 1)
+    cylinder = lba // (heads * sectors)
+    if cylinder > last_cylinder:
+        cylinder, head, sector = last_cylinder, heads - 1, sectors
+    else:
+        head = (lba // sectors) % heads
+        sector = lba % sectors + 1      # sectors start at 1
+
+    # byte 1: sector in bits 0-5, bits 8-9 of the cylinder in bits 6-7; byte 2: bits 0-7 of the cylinder
+    return bytes([head, sector | ((cylinder >> 2) & 0xC0), cylinder & 0xFF])
+
+
+def create_partition_table(target: str, start: int, filesystem: str):
+    """
+    Writes an MBR partition table with a single active partition, from `start` to the end of the disk.
+    """
+    total_sectors = os.path.getsize(target) // SECTOR_SIZE
+    if total_sectors <= start:
+        raise ValueError(f"imageSize is too small, the partition starts at {start * SECTOR_SIZE // 1024} KiB")
+    end = total_sectors - 1
+
+    entry = struct.pack('<B3sB3sII',
+                        0x80,                           # active (bootable)
+                        lba_to_chs(start, total_sectors),
+                        PARTITION_TYPES[filesystem],
+                        lba_to_chs(end, total_sectors),
+                        start,                          # first sector (LBA)
+                        end - start + 1)                # size in sectors
+
     with os.fdopen(os.open(target, os.O_WRONLY), 'wb') as ftarget:
-        ftarget.seek(446 + 4, SEEK_SET)
-        ftarget.write(bytes([PARTITION_TYPES[filesystem]]))
+        ftarget.seek(440, SEEK_SET)
+        ftarget.write(os.urandom(4))                   # disk signature, which some operating systems use to tell disks apart
+        ftarget.write(bytes(2))
+        ftarget.write(entry)                            # partition table: 4 entries, the other 3 stay empty
+        ftarget.seek(510, SEEK_SET)
+        ftarget.write(b'\x55\xAA')                      # boot signature
 
 
 def mount_fs(image: str, mount_dir: str, mount_method: str):
