@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 from SCons.Variables import *
 from SCons.Environment import *
 from SCons.Node import *
@@ -44,12 +45,6 @@ VARS.Add("imageSize",
 VARS.Add("toolchain", 
          help="Path to toolchain directory.",
          default="toolchain")
-
-DEPS = {
-    'binutils': '2.47',
-    'gcc': '16.2.0'
-}
-
 
 #
 # ***  Host environment ***
@@ -100,7 +95,19 @@ if HOST_ENVIRONMENT['arch'] == 'i686':
 
 toolchainDir = Path(HOST_ENVIRONMENT['toolchain'], RemoveSuffix(platform_prefix, '-')).resolve()
 toolchainBin = Path(toolchainDir, 'bin')
-toolchainGccLibs = Path(toolchainDir, 'lib', 'gcc', RemoveSuffix(platform_prefix, '-'), DEPS['gcc'])
+
+def FindGccLibs(compiler):
+    # Ask the compiler where its libraries are (crtbegin.o, crtend.o, libgcc.a). The directory name
+    # contains the GCC version, which could be anything: setup_toolchain.sh can build any version,
+    # and the toolchain could be an older one that was built separately.
+    try:
+        result = subprocess.run([compiler, '-print-libgcc-file-name'], capture_output=True, text=True, check=True)
+        return Path(result.stdout.strip()).parent
+    except (OSError, subprocess.CalledProcessError):
+        # the toolchain isn't built yet
+        return Path(toolchainDir, 'lib', 'gcc', RemoveSuffix(platform_prefix, '-'))
+
+toolchainGccLibs = FindGccLibs(Path(toolchainBin, f'{platform_prefix}gcc'))
 
 TARGET_ENVIRONMENT = HOST_ENVIRONMENT.Clone(
     AR = f'{platform_prefix}ar',
@@ -113,8 +120,6 @@ TARGET_ENVIRONMENT = HOST_ENVIRONMENT.Clone(
     # toolchain
     TOOLCHAIN_PREFIX = str(toolchainDir),
     TOOLCHAIN_LIBGCC = str(toolchainGccLibs),
-    BINUTILS_URL = f'https://ftp.gnu.org/gnu/binutils/binutils-{DEPS["binutils"]}.tar.xz',
-    GCC_URL = f'https://ftp.gnu.org/gnu/gcc/gcc-{DEPS["gcc"]}/gcc-{DEPS["gcc"]}.tar.xz',
 )
 
 

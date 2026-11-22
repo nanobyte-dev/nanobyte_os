@@ -8,9 +8,9 @@ if [ "$#" -le 1 ]; then
 fi
 
 case "$1" in
-    "floppy")   QEMU_ARGS="${QEMU_ARGS} -fda $PWD/$2"
+    "floppy")   QEMU_ARGS="${QEMU_ARGS} -drive file=$PWD/$2,format=raw,if=floppy"
     ;;
-    "disk")     QEMU_ARGS="${QEMU_ARGS} -hda $PWD/$2"
+    "disk")     QEMU_ARGS="${QEMU_ARGS} -drive file=$PWD/$2,format=raw,if=ide"
     ;;
     *)          echo "Unknown image type $1."
                 exit 2

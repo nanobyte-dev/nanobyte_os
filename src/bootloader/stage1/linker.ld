@@ -30,6 +30,10 @@ SECTIONS
     /* Read-only data */
     .rodata             : { *(.rodata)          }
 
+    /* The boot signature goes in the last 2 bytes of the sector, so everything above has to fit
+       in the first 510 bytes */
+    ASSERT(. <= 0x7DFE, "stage1 is bigger than 510 bytes, it doesn't fit in the boot sector")
+
     /* Required for the BIOS to boot our OS */
     .bios_footer 0x7DFE : { SHORT(0xAA55)       }
 
