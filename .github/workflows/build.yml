@@ -1,0 +1,60 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: scripts/install_deps.sh -y
+
+      # only the installed toolchain, not the sources and build directories
+      - name: Cache toolchain
+        id: toolchain-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/../.toolchains/i686-elf
+          key: toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/setup_toolchain.sh') }}
+
+      - name: Build toolchain
+        if: steps.toolchain-cache.outputs.cache-hit != 'true'
+        run: scons toolchain
+
+      - name: Build and boot
+        run: |
+          # boots the image headless, and waits for the kernel to print to the debug console
+          boot() {
+            rm -f e9.log
+            qemu-system-i386 -m 32 -display none -no-reboot -debugcon file:e9.log "$1" build/i686_debug/image.img &
+            qemu=$!
+            for i in $(seq 60); do
+              grep -q "Boot device" e9.log 2>/dev/null && break
+              sleep 1
+            done
+            kill $qemu || true
+            if grep -q "Boot device" e9.log; then
+              echo "$2: boots"
+            else
+              echo "::error::$2 doesn't boot"
+              cat e9.log || true
+              return 1
+            fi
+          }
+
+          scons imageType=floppy
+          boot -fda floppy
+
+          for fs in fat12 fat16 fat32; do
+            scons imageType=disk imageFS=$fs
+            boot -hda "disk $fs"
+          done
