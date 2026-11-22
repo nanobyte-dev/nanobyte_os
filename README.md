@@ -13,6 +13,8 @@ For Part 3, you need the following tools:
 
 * `make`
 * `nasm`
+* `mtools`
+* `dosfstools`
 * `qemu-system-x86` for testing
 * `bochs-x bochsbios vgabios` for debugging
 * your preferred text editor
