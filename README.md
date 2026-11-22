@@ -4,6 +4,10 @@ This repo contains the code from the ["Building an OS"](https://www.youtube.com/
 This branch contains the code as written in [Part 6 - FAT subdirectory support](https://youtu.be/7CrUM8Uf9ho), with some minor bug fixes:
 
 * fixed bochs configuration
+* explained the "TIMES value is negative" error, which means the boot sector code is too big
+* FAT: fixed operator precedence in the directory check
+* added `mtools` and `dosfstools` to the prerequisites
+* added `.gitattributes`, so the files keep LF line endings on Windows (CRLF breaks the bash scripts)
 
 ## Prerequisites
 
