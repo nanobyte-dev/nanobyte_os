@@ -5,6 +5,12 @@ This branch contains the code as written in [Part 7 - Finishing the bootloader, 
 
 * fixed bochs configuration
 * fixed toolchain building script
+* explained the "TIMES value is negative" error, which means the boot sector code is too big
+* FAT: fixed operator precedence in the directory check
+* added `dosfstools` to the prerequisites
+* `make toolchain` can be run again after a failed build
+* updated the toolchain to binutils 2.47 and GCC 16.2.0, the old versions don't build with newer compilers
+* added `.gitattributes`, so the files keep LF line endings on Windows (CRLF breaks the bash scripts)
 
 ## Prerequisites
 
